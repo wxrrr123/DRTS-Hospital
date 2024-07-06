@@ -16,7 +16,7 @@ void System::planReturnTrips() {
         for (auto& patient : patients) {
             if (patient.completionTime <= currentTime) {
                 if (vehicle.addPatient(&patient)) {
-                    patient.waitingTime = currentTime - patient.arrivalTime;
+                    patient.addedTime = currentTime - patient.arrivalTime;
                 }
             }
         }
@@ -27,7 +27,7 @@ void System::planReturnTrips() {
 void System::displayPlan() {
     for (auto& vehicle : vehicles) {
         cout << "Vehicle " << vehicle.id << " departing at "
-             << vehicle.departureTime << " with patients: ";
+             << vehicle.departureTime / 86400 << " with patients: ";
         for (auto& patient : vehicle.patients) {
             cout << patient->id << " ";
         }
