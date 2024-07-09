@@ -1,7 +1,5 @@
 #include "vehicle.hpp"
 
-Vehicle::Vehicle(int id, int cap) : id(id), capacity(cap), departureTime(0) {}
-
 bool Vehicle::addPatient(Patient* patient) {
     if (patients.size() < capacity) {
         patients.push_back(patient);
@@ -10,4 +8,11 @@ bool Vehicle::addPatient(Patient* patient) {
     return false;
 }
 
-void Vehicle::setDepartureTime(time_t time) { departureTime = time; }
+void Vehicle::predictRoutingTime() {
+    int lastDept = predDeptTime.size() - 1;
+    int lastDeptTime = max(idealDeptTime[lastDept], predDeptTime[lastDept]);
+
+    /* To modify */
+    int nextDeptTime = lastDeptTime + patients.size() * 10;
+    predDeptTime.push_back(nextDeptTime);
+}

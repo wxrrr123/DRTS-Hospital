@@ -11,13 +11,15 @@ using namespace std;
 class Vehicle {
   public:
     int id;
-    int capacity;
+    const int capacity = 15;
     vector<Patient*> patients;
-    time_t departureTime;
+    vector<int> idealDeptTime;
+    vector<int> predDeptTime;
+    int numberOfTrip = 3;
 
-    Vehicle(int id, int cap);
+    Vehicle(int id) : id(id){};
     bool addPatient(Patient* patient);
-    void setDepartureTime(time_t time);
+    void predictRoutingTime();
 };
 
 #endif  // VEHICLE_HPP
