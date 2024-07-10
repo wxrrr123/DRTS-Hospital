@@ -1,8 +1,7 @@
 #ifndef PATIENT_HPP
 #define PATIENT_HPP
 
-#include <ctime>
-#include <string>
+#include <bits/stdc++.h>
 
 using namespace std;
 

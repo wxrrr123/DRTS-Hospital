@@ -1,8 +1,5 @@
 #include "system.hpp"
 
-#include <ctime>
-#include <iostream>
-
 void System::addPatient(int id, string dept, string doc, pair<int, int> dest,
                         int arrival) {
     Patient* patient = new Patient(id, dept, doc, dest, arrival);
@@ -17,8 +14,8 @@ void System::addVehicle(int id) {
 void System::generateSche() {
     set<int> comb;
     for (auto& vehicle : vehicles) {
-        srand(time(0) + vehicle->id);
         while (comb.size() < vehicle->numberOfTrip) {
+            srand(time(0) + vehicle->id);
             comb.insert((rand() % 13 + 10) * 60);  // 10 ~ 22 o'clock
         }
         vehicle->idealDeptTime = vector<int>(comb.begin(), comb.end());

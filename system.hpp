@@ -1,14 +1,6 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
-#include <cstdlib>
-#include <deque>
-#include <map>
-#include <queue>
-#include <set>
-#include <string>
-#include <vector>
-
 #include "patient.hpp"
 #include "vehicle.hpp"
 

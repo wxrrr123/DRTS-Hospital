@@ -1,9 +1,6 @@
 #ifndef VEHICLE_HPP
 #define VEHICLE_HPP
 
-#include <ctime>
-#include <vector>
-
 #include "patient.hpp"
 
 using namespace std;
