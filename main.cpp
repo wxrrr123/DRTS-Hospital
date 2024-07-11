@@ -3,7 +3,7 @@
 using namespace std;
 
 int main() {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1; i++) {
         System* system = new System();
 
         system->addPatient(1, "PC", "Dr. A", {20, 30}, 856);

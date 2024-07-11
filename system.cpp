@@ -29,9 +29,9 @@ void System::generateSche() {
 void System::planReturnTrips() {
     while (clock <= 1320) {
         while (!patients.empty()) {
-            Patient* patient = new Patient();
-            patient = patients.top();
+            Patient* patient = patients.top();
             if (patient->addedTime <= clock) {
+                cout << "Patient " << patient->id << " added at " << patient->addedTime << endl;
                 waitingLine.push_back(patient);
                 patients.pop();
             } else {
@@ -48,10 +48,9 @@ void System::planReturnTrips() {
             if (clock == deptTime) {
                 /* Add patients into vehicles */
                 while (!waitingLine.empty()) {
-                    if (veh->patients.size() < veh->capacity) break;
+                    if (veh->patients.size() >= veh->capacity) break;
 
-                    Patient* firstPatient = new Patient();
-                    firstPatient = waitingLine.front();
+                    Patient* firstPatient = waitingLine.front();
                     if (firstPatient->addedTime > deptTime) break;
 
                     veh->patients.push_back(firstPatient);
@@ -72,7 +71,7 @@ void System::displayPlan() {
         int size = veh->predDeptTime.size();
         for (int i = 0; i < size - 1; i++) {
             int deptTime = max(veh->idealDeptTime[i], veh->predDeptTime[i]);
-            cout << veh->idealDeptTime[i] << " ";
+            cout << deptTime << "\t";
         }
         cout << "\n";
     }
