@@ -3,17 +3,22 @@
 using namespace std;
 
 int main() {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 3; i++) {
         System* system = new System();
 
-        system->addPatient(1, "PC", "Dr. A", {20, 30}, 856);
-        system->addPatient(2, "MED", "Dr. B", {10, 40}, 1024);
+        for (int j = 1; j <= 100; j++) {
+            pair<int, int> coord = {rand() % 41 - 20, rand() % 41 - 20};
+            int arr = rand() % 841 + 480;  // [480, 1320]
 
-        system->addVehicle(1);
-        system->addVehicle(2);
+            system->addPatient(j, "MED", "Dr. A", coord, arr);
+        }
 
-        system->generateSche();
+        for (int j = 1; j <= 3; j++) system->addVehicle(j);
+
+        system->generateSchedule();
         system->displayPlan();
+        system->calculatePerformance();
+        cout << endl << endl;
 
         delete system;
     }

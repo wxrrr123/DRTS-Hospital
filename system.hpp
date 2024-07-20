@@ -7,9 +7,7 @@
 using namespace std;
 
 struct patientCmp {
-    bool operator()(Patient* a, Patient* b) {
-        return a->addedTime > b->addedTime;
-    }
+    bool operator()(Patient* a, Patient* b) { return a->addedTime > b->addedTime; }
 };
 
 class System {
@@ -18,15 +16,22 @@ class System {
     vector<Vehicle*> vehicles;
     map<int, string> departments;
     deque<Patient*> waitingLine;
+    vector<Patient*> returnedPatients;
     int clock = 600;
 
+    /* performances */
+    int idleTime = 0;
+    int avgWaitingTime = 0;
+    int missedPatients = 0;
+    int totalPerformance = 0;
+
     System(){};
-    void addPatient(int id, string dept, string doc, pair<int, int> dest,
-                    int arrival);
+    void addPatient(int id, string dept, string doc, pair<int, int> dest, int arrival);
     void addVehicle(int id);
     void planReturnTrips();
     void displayPlan();
-    void generateSche();
+    void generateSchedule();
+    void calculatePerformance();
 };
 
 #endif  // SYSTEM_HPP

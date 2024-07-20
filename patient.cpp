@@ -1,7 +1,6 @@
 #include "patient.hpp"
 
-Patient::Patient(int id, string dept, string doc, pair<int, int> dest,
-                 int arrival)
+Patient::Patient(int id, string dept, string doc, pair<int, int> dest, int arrival)
     : id(id),
       department(dept),
       doctor(doc),
@@ -9,8 +8,6 @@ Patient::Patient(int id, string dept, string doc, pair<int, int> dest,
       arrivalTime(arrival),
       completionTime(0),
       addedTime(0),
-      isOnVehicle(false) {
-    addedTime = arrival + 60;
-}
+      getOnVehicleTime(0) {}
 
-void Patient::predictAddedTime(Patient &patient) {}
+void Patient::predictAddedTime() { addedTime = arrivalTime + 60; }

@@ -14,11 +14,11 @@ class Patient {
     int arrivalTime;
     int completionTime;
     int addedTime;
-    bool isOnVehicle;
+    int getOnVehicleTime;
 
     Patient(){};
     Patient(int id, string dept, string doc, pair<int, int> dest, int arrival);
-    void predictAddedTime(Patient &patient);
+    void predictAddedTime();
 };
 
 #endif  // PATIENT_HPP
