@@ -3,6 +3,8 @@
 
 #include <bits/stdc++.h>
 
+#include <random>
+
 using namespace std;
 
 class Patient {
@@ -15,10 +17,12 @@ class Patient {
     int completionTime;
     int addedTime;
     int getOnVehicleTime;
+    int region;
 
-    Patient(){};
+    Patient() {};
     Patient(int id, string dept, string doc, pair<int, int> dest, int arrival);
     void predictAddedTime();
+    void setRegion();
 };
 
 #endif  // PATIENT_HPP

@@ -3,6 +3,7 @@
 void System::addPatient(int id, string dept, string doc, pair<int, int> dest, int arrival) {
     Patient* patient = new Patient(id, dept, doc, dest, arrival);
     patient->predictAddedTime();
+    patient->setRegion();
     patients.push(patient);
 }
 
@@ -12,14 +13,26 @@ void System::addVehicle(int id) {
 }
 
 void System::generateSchedule() {
-    set<int> comb;
-    for (auto& veh : vehicles) {
-        while (comb.size() < veh->numberOfTrip) {
-            comb.insert((rand() % 13 + 10) * 60);  // 10 ~ 22 o'clock
-        }
-        veh->idealDeptTime = vector<int>(comb.begin(), comb.end());
-        veh->predDeptTime.push_back(veh->idealDeptTime.front());
-        comb.clear();
+    /* randomly generate*/
+    // set<int> comb;
+    // for (auto& veh : vehicles) {
+    //     while (comb.size() < veh->numberOfTrip) {
+    //         comb.insert((rand() % 13 + 10) * 60);  // 10 ~ 22 o'clock
+    //     }
+    //     veh->idealDeptTime = vector<int>(comb.begin(), comb.end());
+    //     veh->predDeptTime.push_back(veh->idealDeptTime.front());
+    //     comb.clear();
+    // }
+
+    vector<vector<int>> schedule;
+    schedule.push_back({660, 960, 1140});
+    schedule.push_back({840, 1080, 1260});
+    schedule.push_back({900, 1140, 1200});
+    schedule.push_back({720, 1140, 1020});
+
+    for (int i = 0; i < vehicles.size(); i++) {
+        vehicles[i]->idealDeptTime = schedule[i];
+        vehicles[i]->predDeptTime.push_back(vehicles[i]->idealDeptTime.front());
     }
 
     planReturnTrips();
@@ -30,7 +43,7 @@ void System::planReturnTrips() {
         while (!patients.empty()) {
             Patient* patient = patients.top();
             if (patient->addedTime <= clock) {
-                waitingLine.push_back(patient);
+                waitingLine[patient->region].push_back(patient);
                 patients.pop();
             } else
                 break;
@@ -44,15 +57,20 @@ void System::planReturnTrips() {
             int deptTime = max(ideal[nth_dept], pred[nth_dept]);
 
             if (clock == deptTime) {
-                /* Add patients into vehicles */
-                while (!waitingLine.empty() && veh->patients.size() < veh->capacity) {
-                    Patient* firstPatient = waitingLine.front();
+                printf("\nClock: %02d:%02d\n", clock / 60, clock % 60);
+                printf("Vehicle ID: %d\n", veh->id);
+
+                /* Add patients into vehicles with different regions */
+                while (!waitingLine[veh->id].empty() && veh->patients.size() < veh->capacity) {
+                    Patient* firstPatient = waitingLine[veh->id].front();
                     firstPatient->getOnVehicleTime = clock;
 
                     veh->patients.push_back(firstPatient);
                     returnedPatients.push_back(firstPatient);
 
-                    waitingLine.pop_front();
+                    waitingLine[veh->id].pop_front();
+
+                    printf("Patient %02d get on.\n", firstPatient->id);
                 }
 
                 veh->predictRoutingTime();
@@ -65,6 +83,7 @@ void System::planReturnTrips() {
 }
 
 void System::displayPlan() {
+    cout << "\n>>>>> SYSTEM RESULT <<<<<" << endl;
     cout << "> Schedule" << endl;
     for (auto& veh : vehicles) {
         cout << "  " << veh->id << ": ";
@@ -91,21 +110,25 @@ void System::calculatePerformance() {
     }
     avgWaitingTime = (returnedPatients.size()) ? totalWaitingTime / returnedPatients.size() : 0;
 
-    missedPatients = waitingLine.size();
+    for (auto& line : waitingLine) {
+        missedPatients = line.size();
+    }
 
     /* calculate the total return time of missed patients (60 km/hr) */
     int totalReturnTime = 0;
-    for (auto& miss : waitingLine) {
-        auto [x, y] = miss->destination;
-        totalReturnTime += abs(x) + abs(y);
+    for (auto& line : waitingLine) {
+        for (auto& patient : line) {
+            auto [x, y] = patient->destination;
+            totalReturnTime += abs(x) + abs(y);
+        }
     }
 
-    totalPerformance = idleTime + 1.5 * avgWaitingTime + 0.1 * totalReturnTime;
+    totalPerformance = 2000 - (idleTime + 1.5 * avgWaitingTime + 0.1 * totalReturnTime);
 
-    cout << "> Performances" << endl;
-    cout << "  Idle Time: " << idleTime << endl;
-    cout << "  Average Waiting Time: " << avgWaitingTime << endl;
-    cout << "  Missed Patients: " << missedPatients << endl;
-    cout << "  Total Return Time: " << totalReturnTime << endl;
-    cout << "  Total Performance: " << totalPerformance << endl;
+    printf("> Performances\n");
+    printf("  Idle Time: %dhr%dmin\n", idleTime / 60, idleTime % 60);
+    printf("  Average Waiting Time: %dhr%dmin\n", avgWaitingTime / 60, avgWaitingTime % 60);
+    printf("  Missed Patients: %d people\n", missedPatients);
+    printf("  Total Return Time of Missed Patients: %0dhr%dmin\n", totalReturnTime / 60, totalReturnTime % 60);
+    printf("  Total Performance: %d\n", totalPerformance);
 }

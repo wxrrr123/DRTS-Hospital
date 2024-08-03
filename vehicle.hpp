@@ -9,13 +9,13 @@ class Vehicle {
   public:
     int id;
     const int capacity = 15;
+    const int numberOfTrip = 3;
     vector<Patient*> patients;
     vector<int> idealDeptTime;
     vector<int> predDeptTime;
-    int numberOfTrip = 3;
+    vector<pair<int, int>> route;
 
-    Vehicle(int id) : id(id){};
-    bool addPatient(Patient* patient);
+    Vehicle(int id) : id(id) {};
     void predictRoutingTime();
 };
 
