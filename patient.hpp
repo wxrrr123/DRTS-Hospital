@@ -11,17 +11,13 @@ class Patient {
   public:
     int id;
     string department;
-    string doctor;
     pair<int, int> destination;
-    int arrivalTime;
-    int completionTime;
     int addedTime;
     int getOnVehicleTime;
     int region;
 
     Patient() {};
-    Patient(int id, string dept, string doc, pair<int, int> dest, int arrival);
-    void predictAddedTime();
+    Patient(int id, string dept, pair<int, int> dest, int added);
     void setRegion();
 };
 

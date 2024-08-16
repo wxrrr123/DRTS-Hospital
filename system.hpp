@@ -28,11 +28,12 @@ class System {
     int totalPerformance = 0;
 
     System() {};
-    void addPatient(int id, string dept, string doc, pair<int, int> dest, int arrival);
-    void addVehicle(int id);
+    void readPatientData(string filename);
+    void addPatient(int id, string dept, pair<int, int> dest, int arrival);
+    void addVehicle(int id, int region);
+    void generateSchedule();
     void planReturnTrips();
     void displayPlan();
-    void generateSchedule();
     void calculatePerformance();
 };
 
