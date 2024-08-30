@@ -12,7 +12,8 @@ struct patientCmp {
 
 class System {
   public:
-    int clock = 600;
+    int clock;
+    int sampleSize;
     const int numOfRegion = 4;
     priority_queue<Patient*, vector<Patient*>, patientCmp> patients;
     vector<Vehicle*> vehicles;
@@ -26,9 +27,9 @@ class System {
     int totalPerformance = 0;
 
     System() {};
-    void readPatientData(string filename);
     void addPatient(int id, string dept, pair<int, int> dest, int arrival);
-    void addVehicle(int id, int region);
+    void addPatient(Patient* patient);
+    void addVehicle(int id);
     void generateSchedule();
     void planReturnTrips();
     void displayPlan();

@@ -12,7 +12,7 @@ void Vehicle::predictRoutingTime() {
     /* Distances from the hospital */
     for (auto &patient : patients) {
         auto [x, y] = patient->destination;
-        distances.push_back({abs(x) + abs(y), patient});
+        distances.push_back({round(sqrt(x * x + y * y) / 1), patient});
     }
 
     sort(distances.begin(), distances.end());
@@ -20,12 +20,12 @@ void Vehicle::predictRoutingTime() {
     for (auto [distance, patient] : distances) {
         auto [currX, currY] = currNode;
         auto [nextX, nextY] = patient->destination;
-        nextDeptTime += abs(nextX - currX) + abs(nextY - currY);
+        nextDeptTime += round(sqrt((nextX - currX) * (nextX - currX) + (nextY - currY) * (nextY - currY)) / 1);
         currNode = {nextX, nextY};
     }
 
     auto [lastX, lastY] = currNode;
-    nextDeptTime += abs(lastX) + abs(lastY);
+    nextDeptTime += round(sqrt(lastX * lastX + lastY * lastY) / 1);
 
     printf("Predict return time: %02d:%02d\n", nextDeptTime / 60, nextDeptTime % 60);
     predDeptTime.push_back(nextDeptTime);

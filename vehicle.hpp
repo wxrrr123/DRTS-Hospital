@@ -14,8 +14,8 @@ class Vehicle {
     vector<Patient*> patients;
     vector<int> idealDeptTime;
     vector<int> predDeptTime;
-    vector<pair<int, int>> route;
 
+    Vehicle(int id) : id(id) {};
     Vehicle(int id, int region) : id(id), region(region) {};
     void predictRoutingTime();
 };

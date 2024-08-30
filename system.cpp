@@ -2,77 +2,19 @@
 
 #include <random>
 
-void System::readPatientData(string filename) {
-    ifstream file(filename);
-    string line;
-    getline(file, line);  // Skip the header line
-
-    random_device rd;
-    mt19937 gen(rd());
-
-    vector<string> reservoir(100);
-    int lineCount = 0;
-    while (lineCount < 100 && getline(file, line)) reservoir[lineCount++] = line;  // Read the first 100 lines
-
-    // Reservoir sampling for the rest of the lines
-    while (getline(file, line)) {
-        ++lineCount;
-        if (uniform_int_distribution<>(0, lineCount - 1)(gen) < 100) {
-            reservoir[uniform_int_distribution<>(0, 99)(gen)] = line;
-        }
-    }
-
-    // Randomly choose 30 coordinates
-    vector<pair<int, int>> coords;
-    for (int j = 0; j < 30; j++) {
-        coords.push_back({uniform_int_distribution<>(-20, 20)(gen), uniform_int_distribution<>(-20, 20)(gen)});
-    }
-
-    // Process the selected lines
-    int id = 1;
-    for (const auto& selectedLine : reservoir) {
-        if (selectedLine.empty()) continue;  // Skip empty lines if any
-
-        istringstream iss(selectedLine);
-        string dept, temp, added_str;
-
-        // Read department (dept)
-        if (!getline(iss, dept, ',')) continue;
-
-        // Skip intermediate fields
-        for (int j = 0; j < 5; ++j) {
-            if (!getline(iss, temp, ',')) break;
-        }
-
-        // Read medication time (added)
-        if (!getline(iss, added_str, ',')) continue;
-
-        // Check if department or medication time is empty
-        if (dept.empty() || added_str.empty()) continue;
-
-        // Convert medication time to minutes (assuming format is HH:MM)
-        istringstream added_iss(added_str);
-        string date, time;
-        getline(added_iss, date, ' ');
-        getline(added_iss, time);
-        int hours = stoi(time.substr(0, 2));
-        int minutes = stoi(time.substr(3, 2));
-        int added = hours * 60 + minutes;
-
-        pair<int, int> coord = coords[uniform_int_distribution<>(0, 29)(gen)];
-
-        addPatient(id++, dept, coord, added);
-    }
-}
-
 void System::addPatient(int id, string dept, pair<int, int> dest, int added) {
     Patient* patient = new Patient(id, dept, dest, added);
     patient->setRegion();
     patients.push(patient);
 }
 
-void System::addVehicle(int id, int region) {
-    Vehicle* vehicle = new Vehicle(id, region);
+void System::addPatient(Patient* patient) {
+    patient->setRegion();
+    patients.push(patient);
+}
+
+void System::addVehicle(int id) {
+    Vehicle* vehicle = new Vehicle(id);
     vehicles.push_back(vehicle);
 }
 
@@ -152,12 +94,26 @@ void System::planReturnTrips() {
 
 void System::displayPlan() {
     cout << "\n>>>>> SYSTEM RESULT <<<<<" << endl;
-    cout << "> Departure Time Schedule" << endl;
+    cout << "> Vehicle Assignment" << endl;
     for (auto& veh : vehicles) {
-        cout << "  " << veh->id << ": ";
-        int size = veh->predDeptTime.size();
-        for (int i = 0; i < size - 1; i++) {
-            int deptTime = max(veh->idealDeptTime[i], veh->predDeptTime[i]);
+        cout << "  ID " << veh->id << ", Region " << veh->region << " => ";
+        for (auto& deptTime : veh->idealDeptTime) {
+            printf("%02d:%02d ", deptTime / 60, deptTime % 60);
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    cout << "> Departure Time Schedule" << endl;
+    vector<multiset<int>> depart(numOfRegion);
+    for (auto& veh : vehicles) {
+        for (auto& deptTime : veh->idealDeptTime) {
+            depart[veh->region - 1].insert(deptTime);
+        }
+    }
+    for (int i = 0; i < numOfRegion; i++) {
+        cout << "  Region " << i + 1 << " => ";
+        for (auto& deptTime : depart[i]) {
             printf("%02d:%02d ", deptTime / 60, deptTime % 60);
         }
         cout << endl;
@@ -178,16 +134,14 @@ void System::calculatePerformance() {
     }
     avgWaitingTime = (returnedPatients.size()) ? totalWaitingTime / returnedPatients.size() : 0;
 
-    for (auto& line : waitingLine) {
-        missedPatients = line.size();
-    }
+    missedPatients = sampleSize - returnedPatients.size();
 
     /* calculate the total return time of missed patients (60 km/hr) */
     int totalReturnTime = 0;
     for (auto& line : waitingLine) {
         for (auto& patient : line) {
             auto [x, y] = patient->destination;
-            totalReturnTime += abs(x) + abs(y);
+            totalReturnTime += round(sqrt(x * x + y * y) / 1);
         }
     }
 
