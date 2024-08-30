@@ -4,8 +4,6 @@
 #include "patient.hpp"
 #include "vehicle.hpp"
 
-#define regionNum 4
-
 using namespace std;
 
 struct patientCmp {
@@ -14,12 +12,12 @@ struct patientCmp {
 
 class System {
   public:
+    int clock = 600;
+    const int numOfRegion = 4;
     priority_queue<Patient*, vector<Patient*>, patientCmp> patients;
     vector<Vehicle*> vehicles;
-    map<int, string> departments;
-    deque<Patient*> waitingLine[regionNum + 1];
+    vector<deque<Patient*>> waitingLine;
     vector<Patient*> returnedPatients;
-    int clock = 600;
 
     /* performances */
     int idleTime = 0;

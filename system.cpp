@@ -5,19 +5,14 @@
 void System::readPatientData(string filename) {
     ifstream file(filename);
     string line;
-    vector<string> reservoir(100);
-    int lineCount = 0;
-
-    // Skip the header line
-    getline(file, line);
+    getline(file, line);  // Skip the header line
 
     random_device rd;
     mt19937 gen(rd());
 
-    // Read the first 100 lines
-    for (; lineCount < 100 && getline(file, line); ++lineCount) {
-        reservoir[lineCount] = line;
-    }
+    vector<string> reservoir(100);
+    int lineCount = 0;
+    while (lineCount < 100 && getline(file, line)) reservoir[lineCount++] = line;  // Read the first 100 lines
 
     // Reservoir sampling for the rest of the lines
     while (getline(file, line)) {
@@ -25,6 +20,12 @@ void System::readPatientData(string filename) {
         if (uniform_int_distribution<>(0, lineCount - 1)(gen) < 100) {
             reservoir[uniform_int_distribution<>(0, 99)(gen)] = line;
         }
+    }
+
+    // Randomly choose 30 coordinates
+    vector<pair<int, int>> coords;
+    for (int j = 0; j < 30; j++) {
+        coords.push_back({uniform_int_distribution<>(-20, 20)(gen), uniform_int_distribution<>(-20, 20)(gen)});
     }
 
     // Process the selected lines
@@ -57,11 +58,6 @@ void System::readPatientData(string filename) {
         int hours = stoi(time.substr(0, 2));
         int minutes = stoi(time.substr(3, 2));
         int added = hours * 60 + minutes;
-
-        vector<pair<int, int>> coords;
-        for (int j = 0; j < 30; j++) {
-            coords.push_back({uniform_int_distribution<>(-20, 20)(gen), uniform_int_distribution<>(-20, 20)(gen)});
-        }
 
         pair<int, int> coord = coords[uniform_int_distribution<>(0, 29)(gen)];
 
@@ -103,8 +99,6 @@ void System::generateSchedule() {
         vehicles[i]->idealDeptTime = schedule[i];
         vehicles[i]->predDeptTime.push_back(vehicles[i]->idealDeptTime.front());
     }
-
-    planReturnTrips();
 }
 
 void System::planReturnTrips() {
@@ -158,7 +152,7 @@ void System::planReturnTrips() {
 
 void System::displayPlan() {
     cout << "\n>>>>> SYSTEM RESULT <<<<<" << endl;
-    cout << "> Schedule" << endl;
+    cout << "> Departure Time Schedule" << endl;
     for (auto& veh : vehicles) {
         cout << "  " << veh->id << ": ";
         int size = veh->predDeptTime.size();

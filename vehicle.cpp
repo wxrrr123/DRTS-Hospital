@@ -24,7 +24,8 @@ void Vehicle::predictRoutingTime() {
         currNode = {nextX, nextY};
     }
 
-    if (distances.size()) nextDeptTime += distances.back().first;
+    auto [lastX, lastY] = currNode;
+    nextDeptTime += abs(lastX) + abs(lastY);
 
     printf("Predict return time: %02d:%02d\n", nextDeptTime / 60, nextDeptTime % 60);
     predDeptTime.push_back(nextDeptTime);
