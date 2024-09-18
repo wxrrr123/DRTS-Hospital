@@ -44,6 +44,8 @@ void System::generateSchedule() {
 }
 
 void System::planReturnTrips() {
+    clock = 600;
+
     while (clock <= 1080) {
         while (!patients.empty()) {
             Patient* patient = patients.top();

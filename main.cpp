@@ -13,7 +13,6 @@ int main() {
 
         for (auto& patient : patientSamples) system->addPatient(patient);
 
-        system->clock = 600;
         system->sampleSize = patientSamples.size();
 
         system->waitingLine.resize(system->numOfRegion + 1);
