@@ -2,38 +2,35 @@
 #define SYSTEM_HPP
 
 #include "patient.hpp"
+#include "subsystem.hpp"
 #include "vehicle.hpp"
 
 using namespace std;
 
-struct patientCmp {
-    bool operator()(Patient* a, Patient* b) { return a->addedTime > b->addedTime; }
-};
-
 class System {
   public:
-    int clock;
-    int sampleSize;
-    const int numOfRegion = 4;
-    priority_queue<Patient*, vector<Patient*>, patientCmp> patients;
+    vector<Patient*> patients;
     vector<Vehicle*> vehicles;
-    vector<deque<Patient*>> waitingLine;
-    vector<Patient*> returnedPatients;
+    vector<Subsystem*> subsystems;
+
+    vector<int> assign;
+    vector<vector<int>> schedule;
 
     /* performances */
-    int idleTime = 0;
+    int avgIdleTime = 0;
     int avgWaitingTime = 0;
     int missedPatients = 0;
-    int totalPerformance = 0;
+    int performance = 0;
 
+    /* initiate */
     System() {};
-    void addPatient(int id, string dept, pair<int, int> dest, int arrival);
-    void addPatient(Patient* patient);
-    void addVehicle(int id);
-    void generateSchedule();
-    void planReturnTrips();
+    vector<Patient*> readPatientData(string filename);
+    void addPatient(Patient* p);
+    void addVehicle(Vehicle* v);
+    void addSubsystem(Subsystem* s);
+
+    void oneDayPerformance();
     void displayPlan();
-    void calculatePerformance();
 };
 
 #endif  // SYSTEM_HPP

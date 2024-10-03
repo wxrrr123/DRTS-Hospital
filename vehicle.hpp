@@ -9,15 +9,16 @@ class Vehicle {
   public:
     int id;
     int region;
-    const int capacity = 15;
-    const int numberOfTrip = 3;
+    int capacity;
+    int tripNum;
     vector<Patient*> patients;
     vector<int> idealDeptTime;
-    vector<int> predDeptTime;
+    vector<int> realDeptTime;
+    vector<int> returnTime;
 
     Vehicle(int id) : id(id) {};
-    Vehicle(int id, int region) : id(id), region(region) {};
-    void predictRoutingTime();
+    Vehicle(int id, int capacity, int tripNum) : id(id), capacity(capacity), tripNum(tripNum) {};
+    void predictReturnTime();
 };
 
 #endif  // VEHICLE_HPP

@@ -1,6 +1,6 @@
 #include "vehicle.hpp"
 
-void Vehicle::predictRoutingTime() {
+void Vehicle::predictReturnTime() {
     int lastDept = predDeptTime.size() - 1;
     int lastDeptTime = max(idealDeptTime[lastDept], predDeptTime[lastDept]);
     printf("Actual departure time: %02d:%02d\n", lastDeptTime / 60, lastDeptTime % 60);
@@ -11,7 +11,7 @@ void Vehicle::predictRoutingTime() {
 
     /* Distances from the hospital */
     for (auto &patient : patients) {
-        auto [x, y] = patient->destination;
+        auto [x, y] = patient->dest;
         distances.push_back({round(sqrt(x * x + y * y) / 1), patient});
     }
 
@@ -19,7 +19,7 @@ void Vehicle::predictRoutingTime() {
 
     for (auto [distance, patient] : distances) {
         auto [currX, currY] = currNode;
-        auto [nextX, nextY] = patient->destination;
+        auto [nextX, nextY] = patient->dest;
         nextDeptTime += round(sqrt((nextX - currX) * (nextX - currX) + (nextY - currY) * (nextY - currY)) / 1);
         currNode = {nextX, nextY};
     }

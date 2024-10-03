@@ -10,14 +10,13 @@ using namespace std;
 class Patient {
   public:
     int id;
-    string department;
-    pair<int, int> destination;
+    pair<int, int> dest;
     int addedTime;
     int getOnVehicleTime;
     int region;
 
     Patient() {};
-    Patient(int id, string dept, pair<int, int> dest, int added);
+    Patient(int id, pair<int, int> dest, int added);
     void setRegion();
 };
 

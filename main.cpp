@@ -1,106 +1,69 @@
+#include "subsystem.hpp"
 #include "system.hpp"
+
+// temp input dataset
+#define dayNum 100
+#define regionNum 5
+#define startTime 600
+#define endTime 1080
+#define vehNum 10
+#define capacity 15
+#define tripNum 3
 
 using namespace std;
 
-vector<Patient*> readPatientData(string filename);
-
 int main() {
-    vector<Patient*> patientSamples = readPatientData("DLtimestamp.csv");
+    /*
+    TODO: input dataset
+    */
 
-    vector<int> regions = {1, 1, 2, 3, 4};
-    do {
-        System* system = new System();
+    // temp system design
+    vector<int> assign = {2, 2, 2, 2, 2};
+    vector<vector<int>> schedule;
+    schedule.push_back({600, 720, 780, 900, 960, 1020});
+    schedule.push_back({600, 780, 840, 900, 960, 1020});
+    schedule.push_back({600, 660, 780, 900, 1020, 1080});
+    schedule.push_back({660, 720, 780, 900, 1020, 1080});
+    schedule.push_back({660, 780, 840, 900, 960, 1080});
 
-        for (auto& patient : patientSamples) system->addPatient(patient);
+    for (int d = 0; d < dayNum; d++) {
+        System* S = new System();
 
-        system->sampleSize = patientSamples.size();
+        /* initiate system */
+        S->assign = assign;
+        S->schedule = schedule;
+        S->patients = S->readPatientData("DLtimestamp.csv");
 
-        system->waitingLine.resize(system->numOfRegion + 1);
-
-        for (int i = 1; i <= 5; i++) system->addVehicle(i);
-        for (int i = 0; i < system->vehicles.size(); i++) {
-            system->vehicles[i]->region = regions[i];
+        for (int i = 0; i < vehNum; i++) {
+            Vehicle* v = new Vehicle(i + 1, capacity, tripNum);
+            S->addVehicle(v);
         }
 
-        system->generateSchedule();
-        system->planReturnTrips();
-        system->displayPlan();
-        system->calculatePerformance();
+        /* initiate subsystem */
+        int vehId = 1;
+        for (int i = 0; i < regionNum; i++) {
+            Subsystem* s = new Subsystem(i + 1, startTime, endTime);
+            S->addSubsystem(s);
+            s->setSchedule(schedule[i]);
 
-        delete system;
-    } while (next_permutation(regions.begin(), regions.end()));
+            for (auto& p : S->patients) {
+                if (p->region == s->id) s->addPatient(p);
+            }
 
-    for (auto patient : patientSamples) delete patient;
+            for (int j = 0; j < assign[s->id - 1]; j++) s->addVehicle(vehId++);
+        }
+
+        for (auto s : S->subsystems) s->oneDaySimulation();
+
+        S->oneDayPerformance();
+
+        for (auto& p : S->patients) delete p;
+        S->patients.clear();
+    }
+
+    totalPerformance();
 
     return 0;
 }
 
-vector<Patient*> readPatientData(string filename) {
-    vector<Patient*> ret;
-
-    ifstream file(filename);
-    string line;
-    getline(file, line);  // Skip the header line
-
-    random_device rd;
-    mt19937 gen(rd());
-
-    vector<string> reservoir(100);
-    int lineCount = 0;
-    while (lineCount < 100 && getline(file, line)) reservoir[lineCount++] = line;  // Read the first 100 lines
-
-    // Reservoir sampling for the rest of the lines
-    while (getline(file, line)) {
-        ++lineCount;
-        if (uniform_int_distribution<>(0, lineCount - 1)(gen) < 100) {
-            reservoir[uniform_int_distribution<>(0, 99)(gen)] = line;
-        }
-    }
-
-    // Randomly generate 30 coordinates
-    vector<pair<int, int>> coords;
-    for (int j = 0; j < 30; j++) {
-        coords.push_back({uniform_int_distribution<>(-20, 20)(gen), uniform_int_distribution<>(-20, 20)(gen)});
-    }
-
-    // Process the selected lines
-    int id = 1;
-    for (const auto& selectedLine : reservoir) {
-        if (selectedLine.empty()) continue;  // Skip empty lines if any
-
-        istringstream iss(selectedLine);
-        string dept, temp, added_str;
-
-        // Read department (dept)
-        if (!getline(iss, dept, ',')) continue;
-
-        // Skip intermediate fields
-        for (int j = 0; j < 5; ++j) {
-            if (!getline(iss, temp, ',')) break;
-        }
-
-        // Read medication time (added)
-        if (!getline(iss, added_str, ',')) continue;
-
-        // Check if department or medication time is empty
-        if (dept.empty() || added_str.empty()) continue;
-
-        // Convert medication time to minutes (assuming format is HH:MM)
-        istringstream added_iss(added_str);
-        string date, time;
-        getline(added_iss, date, ' ');
-        getline(added_iss, time);
-        int hours = stoi(time.substr(0, 2));
-        int minutes = stoi(time.substr(3, 2));
-        int added = hours * 60 + minutes;
-
-        if (added > 1080) continue;
-
-        pair<int, int> coord = coords[uniform_int_distribution<>(0, 29)(gen)];
-
-        Patient* patient = new Patient(id++, dept, coord, added);
-        ret.push_back(patient);
-    }
-
-    return ret;
-}
+void totalPerformance() {}
