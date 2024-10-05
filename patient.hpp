@@ -14,6 +14,7 @@ class Patient {
     int addedTime;
     int getOnVehicleTime;
     int region;
+    bool returned;
 
     Patient() {};
     Patient(int id, pair<int, int> dest, int added);

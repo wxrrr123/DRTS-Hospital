@@ -1,7 +1,7 @@
 #include "patient.hpp"
 
 Patient::Patient(int id, pair<int, int> dest, int added)
-    : id(id), dest(dest), addedTime(added), getOnVehicleTime(0), region(0) {}
+    : id(id), dest(dest), addedTime(added), getOnVehicleTime(0), region(0), returned(false) {}
 
 void Patient::setRegion() {
     auto [x, y] = this->dest;

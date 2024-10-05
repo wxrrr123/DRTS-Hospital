@@ -1,32 +1,31 @@
 #include "vehicle.hpp"
 
 void Vehicle::predictReturnTime() {
-    int lastDept = predDeptTime.size() - 1;
-    int lastDeptTime = max(idealDeptTime[lastDept], predDeptTime[lastDept]);
-    printf("Actual departure time: %02d:%02d\n", lastDeptTime / 60, lastDeptTime % 60);
+    int deptTime = realDeptTime.back();
+    printf("Actual departure time: %02d:%02d\n", deptTime / 60, deptTime % 60);
 
-    int nextDeptTime = lastDeptTime;
+    int nextRetTime = deptTime;
     pair<int, int> currNode = {0, 0};
     vector<pair<int, Patient *>> distances;
 
     /* Distances from the hospital */
-    for (auto &patient : patients) {
-        auto [x, y] = patient->dest;
-        distances.push_back({round(sqrt(x * x + y * y) / 1), patient});
+    for (auto &p : patients) {
+        auto [x, y] = p->dest;
+        distances.push_back({round(sqrt(x * x + y * y)), p});
     }
 
     sort(distances.begin(), distances.end());
 
-    for (auto [distance, patient] : distances) {
+    for (auto [dist, p] : distances) {
         auto [currX, currY] = currNode;
-        auto [nextX, nextY] = patient->dest;
-        nextDeptTime += round(sqrt((nextX - currX) * (nextX - currX) + (nextY - currY) * (nextY - currY)) / 1);
+        auto [nextX, nextY] = p->dest;
+        nextRetTime += round(sqrt((nextX - currX) * (nextX - currX) + (nextY - currY) * (nextY - currY)));
         currNode = {nextX, nextY};
     }
 
     auto [lastX, lastY] = currNode;
-    nextDeptTime += round(sqrt(lastX * lastX + lastY * lastY) / 1);
+    nextRetTime += round(sqrt(lastX * lastX + lastY * lastY));
 
-    printf("Predict return time: %02d:%02d\n", nextDeptTime / 60, nextDeptTime % 60);
-    predDeptTime.push_back(nextDeptTime);
+    printf("Predict return time: %02d:%02d\n", nextRetTime / 60, nextRetTime % 60);
+    returnTime.push_back(nextRetTime);
 }

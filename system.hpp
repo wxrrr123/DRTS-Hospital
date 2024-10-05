@@ -19,17 +19,17 @@ class System {
     /* performances */
     int avgIdleTime = 0;
     int avgWaitingTime = 0;
-    int missedPatients = 0;
-    int performance = 0;
+    int totalRetTime = 0;
+    float performance = 0;
 
     /* initiate */
     System() {};
-    vector<Patient*> readPatientData(string filename);
+    vector<Patient*> readPatientData(string file);
     void addPatient(Patient* p);
     void addVehicle(Vehicle* v);
     void addSubsystem(Subsystem* s);
 
-    void oneDayPerformance();
+    float oneDayPerformance();
     void displayPlan();
 };
 

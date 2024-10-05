@@ -8,7 +8,6 @@ using namespace std;
 class Vehicle {
   public:
     int id;
-    int region;
     int capacity;
     int tripNum;
     vector<Patient*> patients;
