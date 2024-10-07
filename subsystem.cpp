@@ -4,7 +4,7 @@
 
 void Subsystem::addPatient(Patient* p) { patients.push(p); }
 
-void Subsystem::addVehicle(Vehicle* v) { vehicles.push_back(v); }
+void Subsystem::addVehicle(Vehicle* v) { fleet.push_back(v); }
 
 void Subsystem::setSchedule(vector<int> schedule) { this->schedule = schedule; }
 
@@ -15,7 +15,7 @@ void Subsystem::oneDaySimulation() {
     queue<Vehicle*> availVeh;
     list<Vehicle*> onServVeh;
 
-    for (auto& v : vehicles) availVeh.push(v);
+    for (auto& v : fleet) availVeh.push(v);
 
     while (clock <= 1080) {
         while (!patients.empty()) {

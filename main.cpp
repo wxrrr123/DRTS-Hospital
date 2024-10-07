@@ -2,17 +2,18 @@
 #include "system.hpp"
 
 // temp input dataset
-#define dayNum 10
+#define dayNum 3
 #define regionNum 4
 #define startTime 600
 #define endTime 1080
-#define vehNum 8
 #define capacity 15
 #define tripNum 3
 
 using namespace std;
 
-void totalPerformance(int totalKPI);
+void totalPerformance(float totalKPI);
+
+void sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
 
 int main() {
     /*
@@ -20,13 +21,20 @@ int main() {
     */
 
     // temp system design
-    vector<int> assign = {2, 2, 2, 2};
+    vector<int> assign = {2, 1, 2, 2};
     vector<vector<int>> schedule = {{600, 720, 780, 900, 960, 1020},
-                                    {600, 780, 840, 900, 960, 1020},
-                                    // {600, 600, 600, 600, 600, 600},
+                                    {780, 840, 1020},
                                     {600, 660, 780, 900, 1020, 1080},
-                                    {660, 720, 840, 840, 1020, 1080}};
+                                    {660, 720, 720, 960, 960, 1020}};
 
+    sysDesignEval(assign, schedule);
+
+    return 0;
+}
+
+void totalPerformance(float totalKPI) { printf("\n>>>>>>> SYSTEM DESIGN KPI = %.1f <<<<<<<\n", totalKPI / dayNum); }
+
+void sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     float totalKPI = 0;
 
     for (int d = 0; d < dayNum; d++) {
@@ -37,6 +45,7 @@ int main() {
         S->schedule = schedule;
         S->patients = S->readPatientData("DLtimestamp.csv");
 
+        int vehNum = accumulate(assign.begin(), assign.end(), 0);
         for (int i = 0; i < vehNum; i++) {
             Vehicle* v = new Vehicle(i + 1, 15, 3);
             S->addVehicle(v);
@@ -78,10 +87,4 @@ int main() {
     }
 
     totalPerformance(totalKPI);
-
-    return 0;
-}
-
-void totalPerformance(int totalKPI) {
-    printf("\n>>>>>>> SYSTEM DESIGN KPI = %.1f <<<<<<<\n", (float)(totalKPI / dayNum));
-}
+};

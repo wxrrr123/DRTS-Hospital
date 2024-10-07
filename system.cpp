@@ -81,7 +81,7 @@ void System::displayPlan() {
     cout << "\n>>>>> SYSTEM RESULT <<<<<" << endl;
     cout << "> Vehicle Assignment" << endl;
     for (auto& s : subsystems) {
-        for (auto& v : s->vehicles) {
+        for (auto& v : s->fleet) {
             cout << "  ID " << v->id << ", Region " << s->id << " => ";
             for (auto& deptTime : v->idealDeptTime) {
                 printf("%02d:%02d ", deptTime / 60, deptTime % 60);

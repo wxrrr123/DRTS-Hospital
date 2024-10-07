@@ -18,7 +18,7 @@ class Subsystem {
     int endTime;
     vector<int> schedule;
     priority_queue<Patient*, vector<Patient*>, patientCmp> patients;
-    vector<Vehicle*> vehicles;
+    vector<Vehicle*> fleet;
     deque<Patient*> waitingLine;
 
     /* initiate */
