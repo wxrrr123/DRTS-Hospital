@@ -25,7 +25,7 @@ class Subsystem {
     Subsystem(int id, int sT, int eT) : id(id), startTime(sT), endTime(eT) {}
     void addPatient(Patient* p);
     void addVehicle(Vehicle* v);
-    void setSchedule(vector<int> schedule);
+    void setSchedule(vector<int>& schedule);
 
     void oneDaySimulation();
 };

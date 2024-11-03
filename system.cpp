@@ -121,12 +121,12 @@ float System::oneDayPerformance() {
 
     performance = (1000 - (avgIdleTime + 1.5 * avgWaitingTime + totalRetTime)) / 10.0;
 
-    printf("> Performances\n");
-    printf("  Idle Time: %02d:%02d\n", avgIdleTime / 60, avgIdleTime % 60);
-    printf("  Average Waiting Time: %02d:%02d\n", avgWaitingTime / 60, avgWaitingTime % 60);
-    printf("  Missed Patients: %d people\n", missedPatients);
-    printf("  Total Return Time of Missed Patients: %02d:%02d\n", totalRetTime / 60, totalRetTime % 60);
-    printf("  Total Performance: %.1f\n", performance);
+    // printf("> Performances\n");
+    // printf("  Idle Time: %02d:%02d\n", avgIdleTime / 60, avgIdleTime % 60);
+    // printf("  Average Waiting Time: %02d:%02d\n", avgWaitingTime / 60, avgWaitingTime % 60);
+    // printf("  Missed Patients: %d people\n", missedPatients);
+    // printf("  Total Return Time of Missed Patients: %02d:%02d\n", totalRetTime / 60, totalRetTime % 60);
+    // printf("  Total Performance: %.1f\n", performance);
 
     return performance;
 }

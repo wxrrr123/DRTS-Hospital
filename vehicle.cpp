@@ -2,7 +2,7 @@
 
 void Vehicle::predictReturnTime() {
     int deptTime = realDeptTime.back();
-    printf("Actual departure time: %02d:%02d\n", deptTime / 60, deptTime % 60);
+    // printf("Actual departure time: %02d:%02d\n", deptTime / 60, deptTime % 60);
 
     int nextRetTime = deptTime;
     pair<int, int> currNode = {0, 0};
@@ -26,6 +26,6 @@ void Vehicle::predictReturnTime() {
     auto [lastX, lastY] = currNode;
     nextRetTime += round(sqrt(lastX * lastX + lastY * lastY));
 
-    printf("Predict return time: %02d:%02d\n", nextRetTime / 60, nextRetTime % 60);
+    // printf("Predict return time: %02d:%02d\n", nextRetTime / 60, nextRetTime % 60);
     returnTime.push_back(nextRetTime);
 }
