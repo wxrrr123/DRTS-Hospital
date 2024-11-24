@@ -14,33 +14,31 @@ struct Chromo {
 
 class GA {
   public:
-    /*  temp input dataset */
+    /* temp input dataset */
     const int dayNum = 10;
     const int regionNum = 4;
     const int startTime = 600;
     const int endTime = 1080;
     const int capacity = 15;
-    const int tripNum = 3;
+    const int tripNum = 10;
     const int vehNum = 4;
     vector<int> assign = {2, 1, 2, 2};
-    vector<vector<int>> schedule = {{600, 720, 780, 900, 960, 1020},
-                                    {780, 840, 1020},
-                                    {600, 660, 780, 900, 1020, 1080},
-                                    {660, 720, 720, 960, 960, 1020}};
+    vector<vector<int>> schedule;
 
     /* GA parameters */
     int generation = 20;
     int chromNum = 8;
     int geneNum = tripNum * vehNum;
-    int bitNum = ceil(log2((endTime - startTime) / 60));
+    int bitNum = 2;    // {bit:min} = {00:20, 01:30, 10:40, 11:60}
     float pc = 0.5;    // crossover probibilty
     float pm = 0.005;  // mutation probability
 
     vector<Chromo> pop;
+    vector<Chromo> candidates;
 
     GA() {};
     void init();
-    vector<Chromo> select(int size);
+    void select();
     void crossover();
     void mutation();
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);

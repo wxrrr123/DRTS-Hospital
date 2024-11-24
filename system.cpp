@@ -10,15 +10,16 @@ vector<Patient*> System::readPatientData(string file) {
     random_device rd;
     mt19937 gen(rd());
 
-    vector<string> reservoir(100);
+    int sampleNum = 100;
+    vector<string> reservoir(sampleNum);
     int lineCnt = 0;
-    while (lineCnt < 100 && getline(f, line)) reservoir[lineCnt++] = line;  // Read the first 100 lines
+    while (lineCnt < sampleNum && getline(f, line)) reservoir[lineCnt++] = line;  // Read the first 100 lines
 
     // Reservoir sampling for the rest of the lines
     while (getline(f, line)) {
-        ++lineCnt;
-        if (uniform_int_distribution<>(0, lineCnt - 1)(gen) < 100) {
-            reservoir[uniform_int_distribution<>(0, 99)(gen)] = line;
+        lineCnt++;
+        if (uniform_int_distribution<>(0, lineCnt - 1)(gen) < sampleNum) {
+            reservoir[uniform_int_distribution<>(0, sampleNum - 1)(gen)] = line;
         }
     }
 
@@ -93,13 +94,14 @@ void System::displayPlan() {
 }
 
 float System::oneDayPerformance() {
-    int totalIdleTime = 0;
+    int totalIdleTime = 0, totalDeptTimes = 0;
     for (auto& v : vehicles) {
-        for (int i = 1; i < v->tripNum; i++) {
+        for (int i = 1; i < v->realDeptTime.size(); i++) {
             totalIdleTime += max(0, v->realDeptTime[i] - v->returnTime[i - 1]);
         }
+        totalDeptTimes += v->realDeptTime.size();
     }
-    avgIdleTime = totalIdleTime / (vehicles.size() * vehicles.front()->tripNum);
+    avgIdleTime = totalIdleTime / totalDeptTimes;
 
     int totalWaitingTime = 0, totalRetPatient = 0;
     for (auto& p : patients) {

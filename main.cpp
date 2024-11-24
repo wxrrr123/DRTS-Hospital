@@ -1,4 +1,4 @@
-#include "ga.hpp"
+#include "GA.hpp"
 #include "subsystem.hpp"
 #include "system.hpp"
 
@@ -10,10 +10,11 @@ int main() {
     */
 
     GA ga;
-    cout << ">>> GENERATION 1 <<<" << endl;
+    cout << ">>> GENERATION 0 <<<" << endl;
     ga.init();
     for (int i = 0; i < ga.generation; i++) {
-        cout << ">>> GENERATION " << i + 2 << " <<<" << endl;
+        cout << ">>> GENERATION " << i + 1 << " <<<" << endl;
+        ga.select();
         ga.crossover();
         ga.mutation();
     }

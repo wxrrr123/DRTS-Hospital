@@ -41,7 +41,7 @@ void GA::init() {
     return;
 }
 
-vector<Chromo> GA::select(int size) {
+void GA::select() {
     // Calculate the total fitness for each chromosome
     float totalFitness = accumulate(pop.begin(), pop.end(), 0, [](float sum, Chromo& chrom) {
         return sum + chrom.fit;  // Sum of all fitness values
@@ -66,7 +66,7 @@ vector<Chromo> GA::select(int size) {
 
     // Roulette selection to choose chromosomes to crossover
     set<int> selectedIdx;
-    while (selectedIdx.size() < size) {
+    while (selectedIdx.size() < pc * pop.size()) {
         float r = dist(gen);
 
         // First chromosome
@@ -83,10 +83,8 @@ vector<Chromo> GA::select(int size) {
         }
     }
 
-    vector<Chromo> selected;
-    for (int idx : selectedIdx) selected.push_back(pop[idx]);
-
-    return selected;
+    candidates.clear();
+    for (int idx : selectedIdx) candidates.push_back(pop[idx]);
 }
 
 void GA::crossover() {
@@ -94,15 +92,11 @@ void GA::crossover() {
     mt19937 gen(rd());
     uniform_real_distribution<float> dist(0.0, 1.0);
 
-    // Select candidates for crossover
-    vector<Chromo> candidates = select(pc * pop.size());
-
     // Mate selected chromosomes randomly
     for (int i = 0; i < candidates.size(); i += 2) {
         if (i + 1 >= candidates.size()) break;  // Ensure we have a pair
 
-        Chromo parent1 = candidates[i];
-        Chromo parent2 = candidates[i + 1];
+        Chromo &parent1 = candidates[i], &parent2 = candidates[i + 1];
 
         // Randomly select crossover point
         int pos = round(dist(gen) * (parent1.genes.size() - 1));
@@ -125,11 +119,8 @@ void GA::crossover() {
         schedule = chrom2sche(assign, offspring2);
         offspring2.fit = sysDesignEval(assign, schedule);
 
-        // Replace the worst 2 chromosomes
-        pop.push_back(offspring1);
-        pop.push_back(offspring2);
-        sort(pop.begin(), pop.end(), [&](Chromo& a, Chromo& b) { return a.fit > b.fit; });
-        pop.resize(chromNum);
+        // Replace the parents
+        parent1 = offspring1, parent2 = offspring2;
     }
 }
 
@@ -178,15 +169,27 @@ vector<vector<int>> GA::chrom2sche(vector<int>& assign, Chromo& chrom) {
     for (int i = 0; i < regionNum; i++) {
         for (int j = 0; j < assign[i] * tripNum; j++, geneIdx++) {  // Loop through each vehicle for the current region
             // Decode the binary genes for time interval
-            int time = 0;
-            for (int k = 0; k < bitNum; k++) {
-                if (chrom.genes[geneIdx][k]) {
-                    time += (1 << (bitNum - k - 1));  // Convert binary gene to integer time
-                }
+            int code = (chrom.genes[geneIdx][0] << 1) | chrom.genes[geneIdx][1], time = 0;
+            switch (code) {
+                case 0:
+                    time = 20;
+                    break;
+                case 1:
+                    time = 30;
+                    break;
+                case 2:
+                    time = 40;
+                    break;
+                case 3:
+                    time = 60;
+                    break;
+                default:
+                    break;
             }
 
-            // Calculate the actual time based on startTime
-            int actualTime = startTime + time * 60;
+            // Calculate the actual time based on the previous departure time
+            int actualTime = sche[i].size() ? sche[i].back() + time : 600 + time;
+            actualTime = actualTime > endTime ? endTime : actualTime;
             sche[i].push_back(actualTime);
         }
     }
@@ -207,7 +210,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
 
         int vehNum = accumulate(assign.begin(), assign.end(), 0);
         for (int i = 0; i < vehNum; i++) {
-            Vehicle* v = new Vehicle(i + 1, 15, 3);
+            Vehicle* v = new Vehicle(i + 1, capacity, tripNum);
             S->addVehicle(v);
         }
 
