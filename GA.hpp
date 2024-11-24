@@ -15,18 +15,18 @@ struct Chromo {
 class GA {
   public:
     /* temp input dataset */
-    const int dayNum = 10;
+    const int dayNum = 30;
     const int regionNum = 4;
     const int startTime = 600;
     const int endTime = 1080;
     const int capacity = 15;
-    const int tripNum = 10;
-    const int vehNum = 4;
-    vector<int> assign = {2, 1, 2, 2};
+    const int tripNum = 5;
+    const int vehNum = 8;
+    vector<int> assign = {2, 2, 2, 2};
     vector<vector<int>> schedule;
 
     /* GA parameters */
-    int generation = 20;
+    int generation = 100;
     int chromNum = 8;
     int geneNum = tripNum * vehNum;
     int bitNum = 2;    // {bit:min} = {00:20, 01:30, 10:40, 11:60}

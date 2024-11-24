@@ -121,7 +121,9 @@ float System::oneDayPerformance() {
         }
     }
 
-    performance = (1000 - (avgIdleTime + 1.5 * avgWaitingTime + totalRetTime)) / 10.0;
+    int noServVeh = vehicles.size() * vehicles.front()->tripNum - totalDeptTimes;
+
+    performance = (1000 - (avgIdleTime + 1.5 * avgWaitingTime + totalRetTime + noServVeh * 10000)) / 10.0;
 
     // printf("> Performances\n");
     // printf("  Idle Time: %02d:%02d\n", avgIdleTime / 60, avgIdleTime % 60);

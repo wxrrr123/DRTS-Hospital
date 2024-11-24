@@ -7,6 +7,7 @@ void GA::init() {
     mt19937 gen(rd());
     uniform_int_distribution<int> dist(0, (endTime - startTime) / 60 - 1);
 
+    float totalFit = 0;
     for (int i = 0; i < chromNum; i++) {
         // Store unique random integers standing for dept time
         vector<int> dept;
@@ -31,12 +32,12 @@ void GA::init() {
             for (auto bit : gene) cout << bit;
             cout << " ";
         }
-
-        assign = {1, 1, 1, 1};
         schedule = chrom2sche(assign, chrom);
         chrom.fit = sysDesignEval(assign, schedule);
+        totalFit += chrom.fit;
         cout << "Fitness = " << chrom.fit << endl;
     }
+        printf("Average Fitness = %.3f\n", totalFit / chromNum);
 
     return;
 }
@@ -48,15 +49,15 @@ void GA::select() {
     });
 
     // Calculate selection probability for each chromosome
-    vector<float> selectProb(pop.size());
-    for (int i = 0; i < pop.size(); i++) {
+    vector<float> selectProb(chromNum);
+    for (int i = 0; i < chromNum; i++) {
         selectProb[i] = pop[i].fit / totalFitness;  // Probability based on fitness
     }
 
     // Calculate cumulative probability for selection
-    vector<float> cumProb(pop.size());
+    vector<float> cumProb(chromNum);
     cumProb[0] = selectProb[0];
-    for (int i = 1; i < pop.size(); i++) {
+    for (int i = 1; i < chromNum; i++) {
         cumProb[i] = cumProb[i - 1] + selectProb[i];  // Cumulative sum
     }
 
@@ -66,7 +67,7 @@ void GA::select() {
 
     // Roulette selection to choose chromosomes to crossover
     set<int> selectedIdx;
-    while (selectedIdx.size() < pc * pop.size()) {
+    while (selectedIdx.size() < pc * chromNum) {
         float r = dist(gen);
 
         // First chromosome
@@ -113,7 +114,6 @@ void GA::crossover() {
         offspring2.genes.insert(offspring2.genes.end(), parent1.genes.begin() + pos, parent1.genes.end());
 
         // Compute the fitnesses
-        assign = {1, 1, 1, 1};
         schedule = chrom2sche(assign, offspring1);
         offspring1.fit = sysDesignEval(assign, schedule);
         schedule = chrom2sche(assign, offspring2);
@@ -143,6 +143,7 @@ void GA::mutation() {
 
     // Print the genes of the chromosome and its fitness
     int i = 1;
+    float totalFit = 0;
     for (auto chrom : pop) {
         cout << "Chromosome " << i++ << " => ";
         for (auto& gene : chrom.genes) {
@@ -150,11 +151,12 @@ void GA::mutation() {
             cout << " ";
         }
 
-        assign = {1, 1, 1, 1};
         schedule = chrom2sche(assign, chrom);
         chrom.fit = sysDesignEval(assign, schedule);
         cout << "Fitness = " << chrom.fit << endl;
+        totalFit += chrom.fit;
     }
+    printf("Average Fitness = %.3f\n", totalFit / chromNum);
 }
 
 float GA::totalPerformance(float totalKPI) {
