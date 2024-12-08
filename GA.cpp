@@ -5,7 +5,7 @@
 void GA::init() {
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<int> dist(0, (endTime - startTime) / 60 - 1);
+    uniform_int_distribution<int> dist(0, (1 << (bitNum - 1)) - 1);
 
     float totalFit = 0;
     for (int i = 0; i < chromNum; i++) {
@@ -37,7 +37,7 @@ void GA::init() {
         totalFit += chrom.fit;
         cout << "Fitness = " << chrom.fit << endl;
     }
-        printf("Average Fitness = %.3f\n", totalFit / chromNum);
+    printf("Average Fitness = %.3f\n", totalFit / chromNum);
 
     return;
 }
@@ -174,16 +174,16 @@ vector<vector<int>> GA::chrom2sche(vector<int>& assign, Chromo& chrom) {
             int code = (chrom.genes[geneIdx][0] << 1) | chrom.genes[geneIdx][1], time = 0;
             switch (code) {
                 case 0:
-                    time = 20;
-                    break;
-                case 1:
-                    time = 30;
-                    break;
-                case 2:
                     time = 40;
                     break;
-                case 3:
+                case 1:
                     time = 60;
+                    break;
+                case 2:
+                    time = 75;
+                    break;
+                case 3:
+                    time = 90;
                     break;
                 default:
                     break;

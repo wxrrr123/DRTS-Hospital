@@ -16,13 +16,13 @@ class GA {
   public:
     /* temp input dataset */
     const int dayNum = 30;
-    const int regionNum = 4;
+    const int regionNum = 5;
     const int startTime = 600;
     const int endTime = 1080;
     const int capacity = 15;
     const int tripNum = 5;
-    const int vehNum = 8;
-    vector<int> assign = {2, 2, 2, 2};
+    const int vehNum = 10;
+    vector<int> assign = {2, 2, 2, 2, 2};
     vector<vector<int>> schedule;
 
     /* GA parameters */
