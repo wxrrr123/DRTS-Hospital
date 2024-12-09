@@ -20,16 +20,16 @@ class GA {
     const int startTime = 600;
     const int endTime = 1080;
     const int capacity = 15;
-    const int tripNum = 5;
-    const int vehNum = 10;
-    vector<int> assign = {2, 2, 2, 2, 2};
+    const int tripNum = 4;
+    const int vehNum = 5;
+    vector<int> assign = {1, 1, 1, 1, 1};
     vector<vector<int>> schedule;
 
     /* GA parameters */
     int generation = 100;
     int chromNum = 8;
     int geneNum = tripNum * vehNum;
-    int bitNum = 2;    // {bit:min} = {00:20, 01:30, 10:40, 11:60}
+    int bitNum = 2;    // {bit:min} = {"00": +40min, "01": +60min, "10": +75min, "11": +90min}
     float pc = 0.5;    // crossover probibilty
     float pm = 0.005;  // mutation probability
 
