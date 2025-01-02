@@ -10,10 +10,10 @@ int main() {
     */
 
     GA ga;
-    cout << ">>> GENERATION 0 <<<" << endl;
+    cout << ">>> GENERATION 0 <<<\n";
     ga.init();
     for (int i = 0; i < ga.generation; i++) {
-        cout << ">>> GENERATION " << i + 1 << " <<<" << endl;
+        cout << "\n>>> GENERATION " << i + 1 << " <<<\n";
         ga.select();
         ga.crossover();
         ga.mutation();

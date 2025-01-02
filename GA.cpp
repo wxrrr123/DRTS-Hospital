@@ -174,16 +174,16 @@ vector<vector<int>> GA::chrom2sche(vector<int>& assign, Chromo& chrom) {
             int code = (chrom.genes[geneIdx][0] << 1) | chrom.genes[geneIdx][1], time = 0;
             switch (code) {
                 case 0:
-                    time = 40;
+                    time = bit2time[0];
                     break;
                 case 1:
-                    time = 60;
+                    time = bit2time[1];
                     break;
                 case 2:
-                    time = 75;
+                    time = bit2time[2];
                     break;
                 case 3:
-                    time = 90;
+                    time = bit2time[3];
                     break;
                 default:
                     break;

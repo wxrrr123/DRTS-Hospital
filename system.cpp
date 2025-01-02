@@ -102,7 +102,7 @@ float System::oneDayPerformance() {
         totalDeptTimes += v->realDeptTime.size();
     }
     avgIdleTime = totalIdleTime / totalDeptTimes;
-
+    
     int totalWaitingTime = 0, totalRetPatient = 0;
     for (auto& p : patients) {
         if (p->returned) {
@@ -121,6 +121,8 @@ float System::oneDayPerformance() {
         }
     }
 
+    missRate = (float)missedPatients / (float)patients.size();
+
     int noServVeh = vehicles.size() * vehicles.front()->tripNum - totalDeptTimes;
 
     performance = (1000 - (avgIdleTime + 1.5 * avgWaitingTime + totalRetTime + noServVeh * 100)) / 10.0;
@@ -132,5 +134,24 @@ float System::oneDayPerformance() {
     // printf("  Total Return Time of Missed Patients: %02d:%02d\n", totalRetTime / 60, totalRetTime % 60);
     // printf("  Total Performance: %.1f\n", performance);
 
-    return performance;
+    return (validateConstraint() ? performance : 1.0);
+}
+
+bool System::validateConstraint() {
+    /* Maximum delay time */
+    for (auto& v : vehicles) {
+        for (int i = 1; i < v->realDeptTime.size(); i++) {
+            int delayTime = v->returnTime[i - 1] - v->idealDeptTime[i];
+            if (delayTime >= maxDelay) {
+                return false;
+            }
+        }
+    }
+
+    /* Maximum miss rate */
+    if (missRate >= maxMissRate) {
+        return false;
+    }
+
+    return true;
 }
