@@ -12,7 +12,7 @@ void Subsystem::setSchedule(vector<int>& sche) {
 }
 
 void Subsystem::oneDaySimulation() {
-    clock = 600;
+    clock = startTime;
     int t = 1;
 
     queue<Vehicle*> availVeh;
@@ -20,7 +20,7 @@ void Subsystem::oneDaySimulation() {
 
     for (auto& v : fleet) availVeh.push(v);
 
-    while (clock <= 1080) {
+    while (clock <= endTime) {
         while (!patients.empty()) {
             Patient* p = patients.top();
             if (p->addedTime <= clock) {
