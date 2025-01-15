@@ -97,7 +97,7 @@ float System::oneDayPerformance() {
     int totalIdleTime = 0, totalDeptTimes = 0;
     for (auto& v : vehicles) {
         for (int i = 1; i < v->realDeptTime.size(); i++) {
-            totalIdleTime += max(0, v->realDeptTime[i] - v->returnTime[i - 1]);
+            totalIdleTime += max(0, v->idealDeptTime[i] - v->returnTime[i - 1]); // max(0, v->realDeptTime[i] - v->returnTime[i - 1])
         }
         totalDeptTimes += v->realDeptTime.size();
     }
@@ -125,7 +125,15 @@ float System::oneDayPerformance() {
 
     int noServVeh = vehicles.size() * vehicles.front()->tripNum - totalDeptTimes;
 
-    performance = (1000 - (avgIdleTime + 1.5 * avgWaitingTime + totalRetTime + noServVeh * 100)) / 10.0;
+    int totalDelayTime = 0;
+    for (auto& v : vehicles) {
+        for (int i = 1; i < v->realDeptTime.size(); i++) {
+            totalDelayTime += max(0, v->realDeptTime[i] - v->idealDeptTime[i]);
+        }
+    }
+
+    /* New Performance */
+    performance = avgIdleTime + 1.5 * avgWaitingTime + totalRetTime + 10 * totalDelayTime;
 
     // printf("> Performances\n");
     // printf("  Idle Time: %02d:%02d\n", avgIdleTime / 60, avgIdleTime % 60);
@@ -134,7 +142,7 @@ float System::oneDayPerformance() {
     // printf("  Total Return Time of Missed Patients: %02d:%02d\n", totalRetTime / 60, totalRetTime % 60);
     // printf("  Total Performance: %.1f\n", performance);
 
-    return (validateConstraint() ? performance : 1.0);
+    return performance;
 }
 
 bool System::validateConstraint() {
