@@ -43,15 +43,25 @@ void GA::init() {
 }
 
 void GA::select() {
-    // Calculate the total fitness for each chromosome
+    // Calculate ranked weight of each chromosome
+    sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo&b) {
+        return a.fit > b.fit;
+    });
+
+    /*// Calculate the total ranked weight for each chromosome
     float totalFitness = accumulate(pop.begin(), pop.end(), 0, [](float sum, Chromo& chrom) {
         return sum + chrom.fit;  // Sum of all fitness values
-    });
+    });*/
+
+    float totalFitness = 0;
+    for (int i = 0; i < pop.size(); i++) {
+        totalFitness +=  pop.size() - i;
+    }
 
     // Calculate selection probability for each chromosome
     vector<float> selectProb(chromNum);
     for (int i = 0; i < chromNum; i++) {
-        selectProb[i] = pop[i].fit / totalFitness;  // Probability based on fitness
+        selectProb[i] = (chromNum - i) / totalFitness;  // Probability based on fitness
     }
 
     // Calculate cumulative probability for selection
