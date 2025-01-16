@@ -2,5 +2,5 @@ DRTS
 .vscode
 result.txt
 *.csv
-env
+venv
 *.jpg
