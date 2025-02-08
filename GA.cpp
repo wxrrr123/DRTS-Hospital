@@ -25,28 +25,12 @@ void GA::init() {
             chrom.genes.push_back(gene);  // Add the binary gene to the chromosome
         }
         pop.push_back(chrom);  // Add the chromosome to the population
-
-        // Print the genes of the chromosome and its fitness
-        cout << "Chromosome " << i + 1 << " => ";
-        for (auto& gene : chrom.genes) {
-            for (auto bit : gene) cout << bit;
-            cout << " ";
-        }
-        schedule = chrom2sche(assign, chrom);
-        chrom.fit = sysDesignEval(assign, schedule);
-        totalFit += chrom.fit;
-        cout << "Fitness = " << chrom.fit << endl;
     }
-    printf("Average Fitness = %.3f\n", totalFit / chromNum);
-
-    return;
 }
 
 void GA::select() {
     // Calculate ranked weight of each chromosome
-    sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo&b) {
-        return a.fit > b.fit;
-    });
+    sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo& b) { return a.fit > b.fit; });
 
     /*// Calculate the total ranked weight for each chromosome
     float totalFitness = accumulate(pop.begin(), pop.end(), 0, [](float sum, Chromo& chrom) {
@@ -55,7 +39,7 @@ void GA::select() {
 
     float totalFitness = 0;
     for (int i = 0; i < pop.size(); i++) {
-        totalFitness +=  pop.size() - i;
+        totalFitness += pop.size() - i;
     }
 
     // Calculate selection probability for each chromosome
@@ -150,23 +134,6 @@ void GA::mutation() {
             }
         }
     }
-
-    // Print the genes of the chromosome and its fitness
-    int i = 1;
-    float totalFit = 0;
-    for (auto chrom : pop) {
-        cout << "Chromosome " << i++ << " => ";
-        for (auto& gene : chrom.genes) {
-            for (auto bit : gene) cout << bit;
-            cout << " ";
-        }
-
-        schedule = chrom2sche(assign, chrom);
-        chrom.fit = sysDesignEval(assign, schedule);
-        cout << "Fitness = " << chrom.fit << endl;
-        totalFit += chrom.fit;
-    }
-    printf("Average Fitness = %.3f\n", totalFit / chromNum);
 }
 
 float GA::totalPerformance(float totalKPI) {
@@ -262,4 +229,41 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     }
 
     return totalPerformance(totalKPI);
-};
+}
+
+void GA::displayResult() {  // Print the genes of the chromosome and its fitness
+    cout << "Processing..." << endl;
+
+    int i = 1;
+    float totalFit = 0;
+    for (auto chrom : pop) {
+        schedule = chrom2sche(assign, chrom);
+        chrom.fit = sysDesignEval(assign, schedule);
+
+        totalFit += chrom.fit;
+
+        // cout << "Chromosome " << i++ << " => ";
+        // for (auto& gene : chrom.genes) {
+        //     for (auto bit : gene) cout << bit;
+        //     cout << " ";
+        // }
+        // cout << "Fitness = " << chrom.fit << endl;
+
+        if (chrom.fit < bestChrom.fit) {
+            bestChrom = chrom;
+            bestSchedule = schedule;
+        }
+    }
+
+    printf("Average Fitness = %.3f\n", totalFit / chromNum);
+    printf("Best Ever Fitness = %.3f\n", bestChrom.fit);
+
+    cout << "Best Ever Vehicle Assignment:" << endl;
+    for (int i = 0; i < bestSchedule.size(); i++) {
+        printf("\tRegion %d: ", i + 1);
+        for (int j = 0; j < bestSchedule[i].size(); j++) {
+            printf("%02d:%02d ", bestSchedule[i][j] / 60, bestSchedule[i][j] % 60);
+        }
+        cout << endl;
+    }
+}

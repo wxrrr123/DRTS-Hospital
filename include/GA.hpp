@@ -36,15 +36,20 @@ class GA {
 
     vector<Chromo> pop;
     vector<Chromo> candidates;
+    
+    Chromo bestChrom{{}, (float)INT_MAX};
+    vector<vector<int>> bestSchedule;
 
     GA() {};
     void init();
     void select();
     void crossover();
     void mutation();
+
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
     float totalPerformance(float totalKPI);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
+    void displayResult();
 };
 
 #endif  // GA_HPP
