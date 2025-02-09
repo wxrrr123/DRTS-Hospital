@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 filename = "result.txt"
 generations = []
 average_fitness = []
-highest_fitness = []
+best_fitness = []
 highest_generation = -1
 highest_chromosome = -1
 
@@ -27,15 +27,15 @@ with open(filename, 'r') as file:
             average_fitness.append(float(match.group(1)))
         
         if match := re.match(r"Best Ever Fitness = ([\d.]+)", line):
-            highest_fitness.append(float(match.group(1)))
+            best_fitness.append(float(match.group(1)))
 
         # if match := re.match(r"Chromosome (\d+) => ([01 ]+) Fitness = ([\d.]+)", line):
         #     chromosome_num = int(match.group(1))
         #     chromosome_sequence = match.group(2).replace(" ", "")
         #     fitness = float(match.group(3))
 
-        #     if fitness < highest_fitness:
-        #         highest_fitness = fitness
+        #     if fitness < best_fitness:
+        #         best_fitness = fitness
         #         highest_generation = current_generation
         #         highest_chromosome = chromosome_num
         #         highest_chromosome_sequence = chromosome_sequence
@@ -57,7 +57,7 @@ with open(filename, 'r') as file:
 
 #     decoded_times.append([f"{t // 60:02}:{t % 60:02}" for t in group_decoded_times])
                 
-# print(f"Highest Fitness: {highest_fitness}")
+# print(f"Highest Fitness: {best_fitness}")
 # print(f"Generation: {highest_generation}")
 # print(f"Chromosome: {highest_chromosome}")
 # for idx, group in enumerate(decoded_times):
@@ -65,7 +65,7 @@ with open(filename, 'r') as file:
 
 x_values = range(len(average_fitness))
 plt.plot(x_values, average_fitness, marker='o', linestyle='-', label="Average Fitness", color="blue")
-plt.plot(x_values, highest_fitness, marker='s', linestyle='--', label="Highest Fitness", color="red")
+plt.plot(x_values, best_fitness, marker='s', linestyle='--', label="Best Fitness", color="red")
 plt.title("Fitness Over Generations")
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
