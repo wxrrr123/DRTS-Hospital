@@ -28,7 +28,7 @@ void GA::init() {
     }
 }
 
-void GA::select() {
+void GA::selection() {
     // Calculate ranked weight of each chromosome
     sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo& b) { return a.fit > b.fit; });
 
@@ -37,6 +37,7 @@ void GA::select() {
         return sum + chrom.fit;  // Sum of all fitness values
     });*/
 
+    // TO MODIFY
     float totalFitness = 0;
     for (int i = 0; i < pop.size(); i++) {
         totalFitness += pop.size() - i;

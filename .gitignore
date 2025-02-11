@@ -1,6 +1,5 @@
-DRTS
 .vscode
-result.txt
+*.txt
 *.csv
 venv
 *.jpg

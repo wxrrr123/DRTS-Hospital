@@ -17,7 +17,7 @@ int main() {
 
     for (int i = 0; i < ga.generation; i++) {
         cout << "\n>>> GENERATION " << i + 1 << " <<<\n";
-        ga.select();
+        ga.selection();
         ga.crossover();
         ga.mutation();
         ga.displayResult();
