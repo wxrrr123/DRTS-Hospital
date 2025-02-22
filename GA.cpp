@@ -30,23 +30,23 @@ void GA::init() {
 
 void GA::selection() {
     // Calculate ranked weight of each chromosome
-    sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo& b) { return a.fit > b.fit; });
+    sort(pop.begin(), pop.end(), [](const Chromo& a, const Chromo& b) { return a.fit < b.fit; });
 
-    /*// Calculate the total ranked weight for each chromosome
-    float totalFitness = accumulate(pop.begin(), pop.end(), 0, [](float sum, Chromo& chrom) {
-        return sum + chrom.fit;  // Sum of all fitness values
-    });*/
+    // Linear ranking selection
+    vector<float> rankedWeight(chromNum);
+    for (int i = 1; i <= chromNum; i++) {
+        rankedWeight[i] = 2 - sp + 2 * (sp - 1) * (i - 1) / (chromNum - 1);
+    }
 
-    // TO MODIFY
     float totalFitness = 0;
-    for (int i = 0; i < pop.size(); i++) {
-        totalFitness += pop.size() - i;
+    for (int i = 0; i < chromNum; i++) {
+        totalFitness += rankedWeight[i];  // Sum of all fitnesses
     }
 
     // Calculate selection probability for each chromosome
     vector<float> selectProb(chromNum);
     for (int i = 0; i < chromNum; i++) {
-        selectProb[i] = (chromNum - i) / totalFitness;  // Probability based on fitness
+        selectProb[i] = rankedWeight[i] / totalFitness;  // Probability based on ranked weight
     }
 
     // Calculate cumulative probability for selection

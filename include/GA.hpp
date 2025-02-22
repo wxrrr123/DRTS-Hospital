@@ -31,6 +31,7 @@ class GA {
     int geneNum = tripNum * vehNum;
     int bitNum = 2;  // {bit:min} = {"00": +40min, "01": +75min, "10": +110min, "11": +150min}
     vector<int> bit2time = {40, 75, 110, 150};
+    float sp = 1.5;    // selection pressure
     float pc = 0.5;    // crossover probibilty
     float pm = 0.005;  // mutation probability
 
