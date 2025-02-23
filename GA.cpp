@@ -238,7 +238,7 @@ DWORD WINAPI GA::computeFitness(LPVOID arg) {
     vector<vector<int>> schedule = ga->chrom2sche(ga->assign, *chrom);
     chrom->fit = ga->sysDesignEval(ga->assign, schedule);
 
-    WaitForSingleObject(ga->mtx, INFINITE);  // 鎖定互斥鎖
+    WaitForSingleObject(ga->mtx, INFINITE);  // lock mutex
     ga->totalFit += chrom->fit;
 
     if (chrom->fit < ga->bestChrom.fit) {
@@ -246,7 +246,7 @@ DWORD WINAPI GA::computeFitness(LPVOID arg) {
         ga->bestSchedule = schedule;
     }
 
-    // 打印每個染色體的結果
+    // print the chromosome and its fitness
     cout << "Chromosome " << index << " => ";
     for (auto& gene : chrom->genes) {
         for (auto bit : gene) cout << bit;
@@ -254,7 +254,7 @@ DWORD WINAPI GA::computeFitness(LPVOID arg) {
     }
     cout << "Fitness = " << chrom->fit << endl;
 
-    ReleaseMutex(ga->mtx);  // 解鎖互斥鎖
+    ReleaseMutex(ga->mtx);  // unlock mutex
     return 0;
 }
 
@@ -262,18 +262,18 @@ void GA::displayResult() {
     cout << "Processing..." << endl;
 
     totalFit = 0;
-    mtx = CreateMutex(NULL, FALSE, NULL);  // 創建互斥鎖來保護共享變數
+    mtx = CreateMutex(NULL, FALSE, NULL);  // create mutex
 
     vector<HANDLE> threads(pop.size());
     vector<ThreadData> threadData(pop.size());
 
     for (int i = 0; i < pop.size(); i++) {
         threadData[i] = {this, &pop[i], i};
-        threads[i] = CreateThread(NULL, 0, computeFitness, &threadData[i], 0, NULL);  // 創建執行緒來計算適應度並打印結果
+        threads[i] = CreateThread(NULL, 0, computeFitness, &threadData[i], 0, NULL);  // create thread
     }
 
     for (auto& t : threads) {
-        WaitForSingleObject(t, INFINITE);  // 等待所有執行緒完成
+        WaitForSingleObject(t, INFINITE);  // wait for thread to finish
         CloseHandle(t);
     }
 
@@ -289,5 +289,5 @@ void GA::displayResult() {
         cout << endl;
     }
 
-    CloseHandle(mtx);  // 銷毀互斥鎖
+    CloseHandle(mtx);  // close mutex
 }
