@@ -19,6 +19,7 @@ build:
 	g++ -std=c++17 -I$(INC_DIR) -pthread -g -o $(EXECUTABLE) $(SRC_DIR)/main.cpp $(SRC_DIR)/patient.cpp $(SRC_DIR)/vehicle.cpp $(SRC_DIR)/system.cpp $(SRC_DIR)/subsystem.cpp $(SRC_DIR)/GA.cpp
 
 run:
+	mkdir -p $(OUT_DIR)
 	$(EXECUTABLE) $(DATA_DIR) > $(OUTPUT_FILE)
 
 clean:
