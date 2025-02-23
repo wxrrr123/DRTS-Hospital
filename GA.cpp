@@ -257,9 +257,8 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
             // Update the best chromosome
             {
                 lock_guard<mutex> lock(mtx);  // Protect access to bestChrom
-                if (fit < bestChrom.fit) {
+                if (chrom.fit < bestChrom.fit) {
                     bestChrom = chrom;
-                    bestChrom.fit = chrom.fit;
                     bestSchedule = schedule;
                 }
             }
