@@ -1,6 +1,9 @@
 #include "GA.hpp"
 
-#include <random>
+// 解決 byte 命名衝突
+#ifdef _WIN32
+#undef byte
+#endif
 
 void GA::init() {
     random_device rd;
@@ -107,12 +110,6 @@ void GA::crossover() {
         // Reverse for the second offspring
         offspring2.genes.insert(offspring2.genes.end(), parent2.genes.begin(), parent2.genes.begin() + pos);
         offspring2.genes.insert(offspring2.genes.end(), parent1.genes.begin() + pos, parent1.genes.end());
-
-        // Compute the fitnesses
-        schedule = chrom2sche(assign, offspring1);
-        offspring1.fit = sysDesignEval(assign, schedule);
-        schedule = chrom2sche(assign, offspring2);
-        offspring2.fit = sysDesignEval(assign, schedule);
 
         // Replace the parents
         parent1 = offspring1, parent2 = offspring2;
@@ -232,28 +229,52 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     return totalPerformance(totalKPI);
 }
 
-void GA::displayResult() {  // Print the genes of the chromosome and its fitness
+DWORD WINAPI GA::computeFitness(LPVOID arg) {
+    ThreadData* data = static_cast<ThreadData*>(arg);
+    GA* ga = data->ga;
+    Chromo* chrom = data->chrom;
+    int index = data->index;
+
+    vector<vector<int>> schedule = ga->chrom2sche(ga->assign, *chrom);
+    chrom->fit = ga->sysDesignEval(ga->assign, schedule);
+
+    WaitForSingleObject(ga->mtx, INFINITE);  // 鎖定互斥鎖
+    ga->totalFit += chrom->fit;
+
+    if (chrom->fit < ga->bestChrom.fit) {
+        ga->bestChrom = *chrom;
+        ga->bestSchedule = schedule;
+    }
+
+    // 打印每個染色體的結果
+    cout << "Chromosome " << index << " => ";
+    for (auto& gene : chrom->genes) {
+        for (auto bit : gene) cout << bit;
+        cout << " ";
+    }
+    cout << "Fitness = " << chrom->fit << endl;
+
+    ReleaseMutex(ga->mtx);  // 解鎖互斥鎖
+    return 0;
+}
+
+void GA::displayResult() {
     cout << "Processing..." << endl;
 
-    int i = 1;
-    float totalFit = 0;
-    for (auto chrom : pop) {
-        schedule = chrom2sche(assign, chrom);
-        chrom.fit = sysDesignEval(assign, schedule);
+    totalFit = 0;
+    mtx = CreateMutex(NULL, FALSE, NULL);  // 創建互斥鎖來保護共享變數
 
-        totalFit += chrom.fit;
+    vector<HANDLE> threads(pop.size());
+    vector<ThreadData> threadData(pop.size());
 
-        // cout << "Chromosome " << i++ << " => ";
-        // for (auto& gene : chrom.genes) {
-        //     for (auto bit : gene) cout << bit;
-        //     cout << " ";
-        // }
-        // cout << "Fitness = " << chrom.fit << endl;
+    for (int i = 0; i < pop.size(); i++) {
+        threadData[i] = {this, &pop[i], i};
+        threads[i] = CreateThread(NULL, 0, computeFitness, &threadData[i], 0, NULL);  // 創建執行緒來計算適應度並打印結果
+    }
 
-        if (chrom.fit < bestChrom.fit) {
-            bestChrom = chrom;
-            bestSchedule = schedule;
-        }
+    for (auto& t : threads) {
+        WaitForSingleObject(t, INFINITE);  // 等待所有執行緒完成
+        CloseHandle(t);
     }
 
     printf("Average Fitness = %.3f\n", totalFit / chromNum);
@@ -267,4 +288,6 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
         }
         cout << endl;
     }
+
+    CloseHandle(mtx);  // 銷毀互斥鎖
 }

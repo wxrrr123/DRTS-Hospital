@@ -2,6 +2,9 @@
 #define GA_HPP
 
 #include <bits/stdc++.h>
+#include <windows.h>
+
+#include <random>
 
 #include "system.hpp"
 
@@ -11,6 +14,7 @@ struct Chromo {
     vector<vector<bool>> genes;
     float fit;
 };
+
 
 class GA {
   public:
@@ -51,6 +55,18 @@ class GA {
     float totalPerformance(float totalKPI);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
     void displayResult();
+    
+    struct ThreadData {
+      GA* ga;
+      Chromo* chrom;
+      int index;
+    };
+
+  private:
+    HANDLE mtx;
+    float totalFit;
+
+    static DWORD WINAPI computeFitness(LPVOID arg);  // 添加 computeFitness 函數聲明
 };
 
 #endif  // GA_HPP
