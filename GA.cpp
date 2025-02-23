@@ -1,6 +1,9 @@
 #include "GA.hpp"
 
 #include <random>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 void GA::init() {
     random_device rd;
@@ -234,10 +237,37 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
 
 void GA::displayResult() {  // Print the genes of the chromosome and its fitness
     cout << "Processing..." << endl;
-
     int i = 1;
     float totalFit = 0;
+    // mutex mtx;
+    // vector<thread> threads;
+
     for (auto chrom : pop) {
+         /*threads.push_back(thread([&]() {
+            // 在每個執行緒中計算適應度
+            vector<vector<int>> schedule = chrom2sche(assign, chrom);
+            float fit = sysDesignEval(assign, schedule);
+
+            // 更新總適應度
+            {
+                lock_guard<mutex> lock(mtx);  // 保護對 totalFit 的訪問
+                totalFit += chrom.fit;
+            }
+
+            // 更新最優染色體
+            {
+                lock_guard<mutex> lock(mtx);  // 保護對 bestChrom 的訪問
+                if (chrom.fit < bestChrom.fit) {
+                    bestChrom = chrom;
+                    bestSchedule = schedule; /*
+                }
+            }
+        }));
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }*/
         schedule = chrom2sche(assign, chrom);
         chrom.fit = sysDesignEval(assign, schedule);
 
