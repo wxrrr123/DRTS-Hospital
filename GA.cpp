@@ -1,10 +1,5 @@
 #include "GA.hpp"
 
-#include <random>
-#include <thread>
-#include <mutex>
-#include <atomic>
-
 void GA::init() {
     random_device rd;
     mt19937 gen(rd());
@@ -110,12 +105,6 @@ void GA::crossover() {
         // Reverse for the second offspring
         offspring2.genes.insert(offspring2.genes.end(), parent2.genes.begin(), parent2.genes.begin() + pos);
         offspring2.genes.insert(offspring2.genes.end(), parent1.genes.begin() + pos, parent1.genes.end());
-
-        // Compute the fitnesses
-        schedule = chrom2sche(assign, offspring1);
-        offspring1.fit = sysDesignEval(assign, schedule);
-        schedule = chrom2sche(assign, offspring2);
-        offspring2.fit = sysDesignEval(assign, schedule);
 
         // Replace the parents
         parent1 = offspring1, parent2 = offspring2;
@@ -239,51 +228,48 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
     cout << "Processing..." << endl;
     int i = 1;
     float totalFit = 0;
-    // mutex mtx;
-    // vector<thread> threads;
+    mutex mtx;
+    vector<thread> threads;
 
-    for (auto chrom : pop) {
-         /*threads.push_back(thread([&]() {
-            // 在每個執行緒中計算適應度
+    for (auto& chrom : pop) {
+        threads.push_back(thread([&]() {
+            // Calculate fitness in each thread
             vector<vector<int>> schedule = chrom2sche(assign, chrom);
             float fit = sysDesignEval(assign, schedule);
 
-            // 更新總適應度
+            // Print the chromosome and its fitness
             {
-                lock_guard<mutex> lock(mtx);  // 保護對 totalFit 的訪問
-                totalFit += chrom.fit;
+                lock_guard<mutex> lock(mtx);  // Protect access to cout
+                cout << "Chromosome " << i++ << " => ";
+                for (auto& gene : chrom.genes) {
+                    for (auto bit : gene) cout << bit;
+                    cout << " ";
+                }
+                cout << "Fitness = " << fit << endl;
             }
 
-            // 更新最優染色體
+            // Update total fitness
             {
-                lock_guard<mutex> lock(mtx);  // 保護對 bestChrom 的訪問
-                if (chrom.fit < bestChrom.fit) {
+                lock_guard<mutex> lock(mtx);  // Protect access to totalFit
+                totalFit += fit;
+            }
+
+            // Update the best chromosome
+            {
+                lock_guard<mutex> lock(mtx);  // Protect access to bestChrom
+                if (fit < bestChrom.fit) {
                     bestChrom = chrom;
-                    bestSchedule = schedule; /*
+                    bestSchedule = schedule;
                 }
             }
+
+            // Update the chromosome's fitness
+            chrom.fit = fit;
         }));
     }
 
     for (auto& t : threads) {
         t.join();
-    }*/
-        schedule = chrom2sche(assign, chrom);
-        chrom.fit = sysDesignEval(assign, schedule);
-
-        totalFit += chrom.fit;
-
-        // cout << "Chromosome " << i++ << " => ";
-        // for (auto& gene : chrom.genes) {
-        //     for (auto bit : gene) cout << bit;
-        //     cout << " ";
-        // }
-        // cout << "Fitness = " << chrom.fit << endl;
-
-        if (chrom.fit < bestChrom.fit) {
-            bestChrom = chrom;
-            bestSchedule = schedule;
-        }
     }
 
     printf("Average Fitness = %.3f\n", totalFit / chromNum);

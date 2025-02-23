@@ -3,6 +3,11 @@
 
 #include <bits/stdc++.h>
 
+#include <atomic>
+#include <mutex>
+#include <random>
+#include <thread>
+
 #include "system.hpp"
 
 using namespace std;
@@ -27,7 +32,7 @@ class GA {
 
     /* GA parameters */
     int generation = 1;
-    int chromNum = 100;
+    int chromNum = 20;
     int geneNum = tripNum * vehNum;
     int bitNum = 2;  // {bit:min} = {"00": +40min, "01": +75min, "10": +110min, "11": +150min}
     vector<int> bit2time = {40, 75, 110, 150};
