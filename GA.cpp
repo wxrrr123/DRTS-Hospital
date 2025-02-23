@@ -186,7 +186,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         /* initiate system */
         S->assign = assign;
         S->schedule = schedule;
-        S->patients = S->readPatientData("DLtimestamp.csv");
+        S->patients = S->readPatientData("./data/DLtimestamp.csv");
 
         int vehNum = accumulate(assign.begin(), assign.end(), 0);
         for (int i = 0; i < vehNum; i++) {
