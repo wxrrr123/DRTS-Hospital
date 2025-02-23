@@ -31,7 +31,7 @@ class GA {
     vector<vector<int>> schedule;
 
     /* GA parameters */
-    int generation = 1;
+    int generation = 1000;
     int chromNum = 20;
     int geneNum = tripNum * vehNum;
     int bitNum = 2;  // {bit:min} = {"00": +40min, "01": +75min, "10": +110min, "11": +150min}

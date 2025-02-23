@@ -238,7 +238,7 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
             chrom.fit = sysDesignEval(assign, schedule);
 
             // Print the chromosome and its fitness
-            {
+            /*{
                 lock_guard<mutex> lock(mtx);  // Protect access to cout
                 cout << "Chromosome " << i++ << " => ";
                 for (auto& gene : chrom.genes) {
@@ -246,7 +246,7 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
                     cout << " ";
                 }
                 cout << "Fitness = " << chrom.fit << endl;
-            }
+            }*/
 
             // Update total fitness
             {
