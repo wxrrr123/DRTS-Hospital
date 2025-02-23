@@ -235,7 +235,7 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
         threads.push_back(thread([&]() {
             // Calculate fitness in each thread
             vector<vector<int>> schedule = chrom2sche(assign, chrom);
-            float fit = sysDesignEval(assign, schedule);
+            chrom.fit = sysDesignEval(assign, schedule);
 
             // Print the chromosome and its fitness
             {
@@ -245,13 +245,13 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
                     for (auto bit : gene) cout << bit;
                     cout << " ";
                 }
-                cout << "Fitness = " << fit << endl;
+                cout << "Fitness = " << chrom.fit << endl;
             }
 
             // Update total fitness
             {
                 lock_guard<mutex> lock(mtx);  // Protect access to totalFit
-                totalFit += fit;
+                totalFit += chrom.fit;
             }
 
             // Update the best chromosome
@@ -259,12 +259,10 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
                 lock_guard<mutex> lock(mtx);  // Protect access to bestChrom
                 if (fit < bestChrom.fit) {
                     bestChrom = chrom;
+                    bestChrom.fit = chrom.fit;
                     bestSchedule = schedule;
                 }
             }
-
-            // Update the chromosome's fitness
-            chrom.fit = fit;
         }));
     }
 
