@@ -8,7 +8,7 @@ EXECUTABLE := $(BIN_DIR)/DRTS
 
 TIMESTAMP := $(shell date +"%Y-%m-%d-%H%M%S")
 
-OUTPUT_FILE := $(OUT_DIR)/simualtion_$(TIMESTAMP).txt
+OUTPUT_FILE := $(OUT_DIR)/simulation_$(TIMESTAMP).txt
 
 .PHONY: build run clean
 
@@ -16,7 +16,7 @@ all: build run
 
 build:
 	mkdir -p $(BIN_DIR)
-	g++ -std=c++17 -I$(INC_DIR) -pthread -g -o $(EXECUTABLE) $(SRC_DIR)/main.cpp $(SRC_DIR)/patient.cpp $(SRC_DIR)/vehicle.cpp $(SRC_DIR)/system.cpp $(SRC_DIR)/subsystem.cpp $(SRC_DIR)/GA.cpp
+	g++ -std=c++17 -I$(INC_DIR) -pthread -g -O3 -o $(EXECUTABLE) $(SRC_DIR)/main.cpp $(SRC_DIR)/patient.cpp $(SRC_DIR)/vehicle.cpp $(SRC_DIR)/system.cpp $(SRC_DIR)/subsystem.cpp $(SRC_DIR)/GA.cpp
 
 run:
 	mkdir -p $(OUT_DIR)
