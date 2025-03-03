@@ -55,7 +55,8 @@ class GA {
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
     float totalPerformance(float totalKPI);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
-    void displayResult();
+    void simulation();
+    void showBestAssignment();
 };
 
 #endif  // GA_HPP

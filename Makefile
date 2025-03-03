@@ -11,7 +11,7 @@ OUT_FILE := $(OUT_DIR)/$(TIMESTAMP).txt
 
 .PHONY: all build run clean
 
-all: clean build run
+all: build run
 
 build: $(EXE_FILE)
 
@@ -19,7 +19,7 @@ $(EXE_FILE): $(SRC_FILE)
 	mkdir -p $(BIN_DIR)
 	g++ $(CXXFLAGS) -o $@ $^
 
-run: build
+run:
 	mkdir -p $(OUT_DIR)
 	$(EXE_FILE) > $(OUT_FILE)
 

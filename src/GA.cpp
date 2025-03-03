@@ -224,7 +224,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     return totalPerformance(totalKPI);
 }
 
-void GA::displayResult() {  // Print the genes of the chromosome and its fitness
+void GA::simulation() {  // Calculate the genes of the chromosome and its fitness
     cout << "Processing..." << endl;
     int i = 1;
     float totalFit = 0;
@@ -271,8 +271,10 @@ void GA::displayResult() {  // Print the genes of the chromosome and its fitness
 
     printf("Average Fitness = %.3f\n", totalFit / chromNum);
     printf("Best Ever Fitness = %.3f\n", bestChrom.fit);
+}
 
-    cout << "Best Ever Vehicle Assignment:" << endl;
+void GA::showBestAssignment() {  // Print the best vehicle assignment
+    cout << "\n>>>>> Best Ever Vehicle Assignment <<<<<\n";
     for (int i = 0; i < bestSchedule.size(); i++) {
         printf("\tRegion %d: ", i + 1);
         for (int j = 0; j < bestSchedule[i].size(); j++) {
