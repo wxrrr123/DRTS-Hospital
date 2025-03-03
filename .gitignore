@@ -1,8 +1,5 @@
-.vscode
-*.txt
-*.csv
-venv
-*.jpg
-*.o
+.*
 bin
+data
 output
+venv

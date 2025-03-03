@@ -1,26 +1,27 @@
 SRC_DIR := src
-INC_DIR := include
 BIN_DIR := bin
 OUT_DIR := output
-DATA_DIR := data
 
-EXECUTABLE := $(BIN_DIR)/DRTS
+CXXFLAGS := -std=c++17 -Iinclude -pthread -O3
+TIMESTAMP := $(shell date +"%Y%m%d_%H%M%S")
 
-TIMESTAMP := $(shell date +"%Y-%m-%d-%H%M%S")
+EXE_FILE := $(BIN_DIR)/DRTS
+SRC_FILE := $(wildcard $(SRC_DIR)/*.cpp)
+OUT_FILE := $(OUT_DIR)/$(TIMESTAMP).txt
 
-OUTPUT_FILE := $(OUT_DIR)/simulation_$(TIMESTAMP).txt
+.PHONY: all build run clean
 
-.PHONY: build run clean
+all: clean build run
 
-all: build run
+build: $(EXE_FILE)
 
-build:
+$(EXE_FILE): $(SRC_FILE)
 	mkdir -p $(BIN_DIR)
-	g++ -std=c++17 -I$(INC_DIR) -pthread -g -O3 -o $(EXECUTABLE) $(SRC_DIR)/main.cpp $(SRC_DIR)/patient.cpp $(SRC_DIR)/vehicle.cpp $(SRC_DIR)/system.cpp $(SRC_DIR)/subsystem.cpp $(SRC_DIR)/GA.cpp
+	g++ $(CXXFLAGS) -o $@ $^
 
-run:
+run: build
 	mkdir -p $(OUT_DIR)
-	$(EXECUTABLE) $(DATA_DIR) > $(OUTPUT_FILE)
+	$(EXE_FILE) > $(OUT_FILE)
 
 clean:
-	rm -rf $(BIN_DIR)/* $(OUT_DIR)/*
+	rm -rf $(BIN_DIR) $(OUT_DIR)
