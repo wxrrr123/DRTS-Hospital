@@ -1,7 +1,7 @@
 #include "system.hpp"
 
 vector<Patient*> System::readPatientData(string file) {
-    vector<Patient*> ret;
+    vector<Patient*> allPatient;
 
     ifstream f(file);
     string line;
@@ -10,31 +10,11 @@ vector<Patient*> System::readPatientData(string file) {
     random_device rd;
     mt19937 gen(rd());
 
-    int sampleNum = 100;
-    vector<string> reservoir(sampleNum);
-    int lineCnt = 0;
-    while (lineCnt < sampleNum && getline(f, line)) reservoir[lineCnt++] = line;  // Read the first 100 lines
-
-    // Reservoir sampling for the rest of the lines
+    // Read all lines from the file
     while (getline(f, line)) {
-        lineCnt++;
-        if (uniform_int_distribution<>(0, lineCnt - 1)(gen) < sampleNum) {
-            reservoir[uniform_int_distribution<>(0, sampleNum - 1)(gen)] = line;
-        }
-    }
+        if (line.empty()) continue;  // Skip empty lines if any
 
-    // Randomly generate 30 coordinates
-    vector<pair<int, int>> coords;
-    for (int j = 0; j < 30; j++) {
-        coords.push_back({uniform_int_distribution<>(-20, 20)(gen), uniform_int_distribution<>(-20, 20)(gen)});
-    }
-
-    // Process the selected lines
-    int id = 1;
-    for (const auto& selectedLine : reservoir) {
-        if (selectedLine.empty()) continue;  // Skip empty lines if any
-
-        istringstream iss(selectedLine);
+        istringstream iss(line);
         string dept, temp, added_str;
 
         // Read department (dept)
@@ -62,21 +42,18 @@ vector<Patient*> System::readPatientData(string file) {
 
         if (added > 1080) continue;
 
-        pair<int, int> coord = coords[uniform_int_distribution<>(0, 29)(gen)];
-
-        Patient* p = new Patient(id++, coord, added);
-        p->setRegion();
-        ret.push_back(p);
+        Patient* p = new Patient(allPatient.size() + 1, added);
+        allPatient.push_back(p);
     }
 
-    return ret;
+    return allPatient;
 }
 
-void System::addPatient(Patient* p) { patients.push_back(p); };
+void System::addPatient(Patient* p) { patients.push_back(p); }
 
-void System::addVehicle(Vehicle* v) { vehicles.push_back(v); };
+void System::addVehicle(Vehicle* v) { vehicles.push_back(v); }
 
-void System::addSubsystem(Subsystem* s) { subsystems.push_back(s); };
+void System::addSubsystem(Subsystem* s) { subsystems.push_back(s); }
 
 void System::displayPlan() {
     cout << "\n>>>>> SYSTEM RESULT <<<<<" << endl;

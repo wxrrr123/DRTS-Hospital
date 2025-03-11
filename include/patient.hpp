@@ -34,7 +34,7 @@ class Patient {
         {28, {18, 21}}, {29, {21, 20}}, {40, {24, 32}}, {44, {33, 29}}, {51, {45, 24}}, {55, {33, 44}}};
 
     Patient() {};
-    Patient(int id, pair<int, int> dest, int added);
+    Patient(int id, int added);
     void setRegion();
 };
 

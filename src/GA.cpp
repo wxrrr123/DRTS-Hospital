@@ -178,7 +178,20 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         /* initiate system */
         S->assign = assign;
         S->schedule = schedule;
-        S->patients = S->readPatientData("./data/DLtimestamp.csv");
+
+        // Randomly sample patients from allPatients
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, allPatients.size() - 1);
+        unordered_set<int> selectedIdx;
+        while (selectedIdx.size() < allPatients.size()) {
+            selectedIdx.insert(dis(gen));
+        }
+        for (int i = 0; i < allPatients.size(); i++) {
+            Patient *p = new Patient(i + 1, allPatients[i]->addedTime);
+            p->setRegion();
+            S->addPatient(p);
+        }
 
         int vehNum = accumulate(assign.begin(), assign.end(), 0);
         for (int i = 0; i < vehNum; i++) {
@@ -224,7 +237,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     return totalPerformance(totalKPI);
 }
 
-void GA::simulation() {  // Calculate the genes of the chromosome and its fitness
+void GA::simulation() {
     cout << "Processing..." << endl;
     int i = 1;
     float totalFit = 0;
@@ -238,7 +251,7 @@ void GA::simulation() {  // Calculate the genes of the chromosome and its fitnes
             chrom.fit = sysDesignEval(assign, schedule);
 
             // Print the chromosome and its fitness
-            /*{
+            {
                 lock_guard<mutex> lock(mtx);  // Protect access to cout
                 cout << "Chromosome " << i++ << " => ";
                 for (auto& gene : chrom.genes) {
@@ -246,7 +259,7 @@ void GA::simulation() {  // Calculate the genes of the chromosome and its fitnes
                     cout << " ";
                 }
                 cout << "Fitness = " << chrom.fit << endl;
-            }*/
+            }
 
             // Update total fitness
             {

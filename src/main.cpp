@@ -11,6 +11,11 @@ int main() {
     auto start = chrono::high_resolution_clock::now();
 
     GA ga;
+
+    // Read all patient data once
+    System S;
+    ga.allPatients = S.readPatientData("./data/DLtimestamp.csv");
+
     cout << ">>> GENERATION 0 <<<\n";
     ga.init();
     ga.simulation();
@@ -24,6 +29,8 @@ int main() {
     }
 
     ga.showBestAssignment();
+
+    for (auto& p : ga.allPatients) delete p;
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, ratio<3600>> duration = end - start;
