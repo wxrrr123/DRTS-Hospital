@@ -27,6 +27,7 @@ class GA {
     const int capacity = 15;
     const int tripNum = 4;
     const int vehNum = 5;
+    const int sampleNum = 100;
     vector<Patient*> allPatients;
     vector<int> assign = {1, 1, 1, 1, 1};
     vector<vector<int>> schedule;

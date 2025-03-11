@@ -184,11 +184,12 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         mt19937 gen(rd());
         uniform_int_distribution<> dis(0, allPatients.size() - 1);
         unordered_set<int> selectedIdx;
-        while (selectedIdx.size() < allPatients.size()) {
+        while (selectedIdx.size() < sampleNum) {
             selectedIdx.insert(dis(gen));
         }
-        for (int i = 0; i < allPatients.size(); i++) {
-            Patient *p = new Patient(i + 1, allPatients[i]->addedTime);
+        int patientIdx = 1;
+        for (int idx : selectedIdx) {
+            Patient* p = new Patient(patientIdx++, allPatients[idx]->addedTime);
             p->setRegion();
             S->addPatient(p);
         }
@@ -251,15 +252,15 @@ void GA::simulation() {
             chrom.fit = sysDesignEval(assign, schedule);
 
             // Print the chromosome and its fitness
-            {
-                lock_guard<mutex> lock(mtx);  // Protect access to cout
-                cout << "Chromosome " << i++ << " => ";
-                for (auto& gene : chrom.genes) {
-                    for (auto bit : gene) cout << bit;
-                    cout << " ";
-                }
-                cout << "Fitness = " << chrom.fit << endl;
-            }
+            // {
+            //     lock_guard<mutex> lock(mtx);  // Protect access to cout
+            //     cout << "Chromosome " << i++ << " => ";
+            //     for (auto& gene : chrom.genes) {
+            //         for (auto bit : gene) cout << bit;
+            //         cout << " ";
+            //     }
+            //     cout << "Fitness = " << chrom.fit << endl;
+            // }
 
             // Update total fitness
             {
