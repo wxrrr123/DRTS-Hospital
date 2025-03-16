@@ -30,11 +30,13 @@ int main() {
 
     ga.showBestAssignment();
 
-    for (auto& p : ga.allPatients) delete p;
-
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, ratio<3600>> duration = end - start;
-    cout << "Time Consumed: " << duration.count() << " hours" << endl;
+    cout << "\nTime Consumed: " << duration.count() << " hours" << endl;
+
+    ga.testBestAssignment();
+
+    for (auto& p : ga.allPatients) delete p;
 
     return 0;
 }

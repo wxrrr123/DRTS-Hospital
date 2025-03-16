@@ -287,7 +287,7 @@ void GA::simulation() {
     printf("Best Ever Fitness = %.3f\n", bestChrom.fit);
 }
 
-void GA::showBestAssignment() {  // Print the best vehicle assignment
+void GA::showBestAssignment() {
     cout << "\n>>>>> Best Ever Vehicle Assignment <<<<<\n";
     for (int i = 0; i < bestSchedule.size(); i++) {
         printf("\tRegion %d: ", i + 1);
@@ -296,4 +296,13 @@ void GA::showBestAssignment() {  // Print the best vehicle assignment
         }
         cout << endl;
     }
+}
+
+void GA::testBestAssignment() {
+    float totalFit = 0;
+    for (int i = 0; i < 100; i++) {
+        totalFit += sysDesignEval(assign, bestSchedule);
+    }
+    cout << "\n Best Result Test: ";
+    cout << totalFit / 100 << endl;
 }

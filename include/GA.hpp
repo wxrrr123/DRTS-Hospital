@@ -20,21 +20,21 @@ struct Chromo {
 class GA {
   public:
     /* temp input dataset */
-    const int dayNum = 30;
+    const int dayNum = 100;
     const int regionNum = 5;
     const int startTime = 600;  // 10:00
     const int endTime = 1080;   // 18:00
     const int capacity = 15;
     const int tripNum = 4;
-    const int vehNum = 5;
+    const int vehNum = 8;
     const int sampleNum = 100;
     vector<Patient*> allPatients;
-    vector<int> assign = {1, 1, 1, 1, 1};
+    vector<int> assign = {2, 2, 2, 1, 1};
     vector<vector<int>> schedule;
 
     /* GA parameters */
-    int generation = 1000;
-    int chromNum = 20;
+    int generation = 5000;
+    int chromNum = 40;
     int geneNum = tripNum * vehNum;
     int bitNum = 2;  // {bit:min} = {"00": +40min, "01": +75min, "10": +110min, "11": +150min}
     vector<int> bit2time = {40, 75, 110, 150};
@@ -59,6 +59,7 @@ class GA {
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
     void simulation();
     void showBestAssignment();
+    void testBestAssignment();
 };
 
 #endif  // GA_HPP
