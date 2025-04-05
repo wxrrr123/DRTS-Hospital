@@ -5,7 +5,7 @@
 ```shell
 $ mkdir data
 ```
-2. Please download the input data from this [link](https://drive.google.com/file/d/1P74jTDY4CBvQcxlLtqbMqrDX4SvdeRam/view?usp=drive_link) and place it into the `data` directory.
+2. Please download the input data from this [link](https://drive.google.com/file/d/1CqaYhjyeqX6PAEaSn5KvpUF7IsTtt7nx/view?usp=drive_link) and place it into the `data` directory.
 
 ## Running the Program
 
