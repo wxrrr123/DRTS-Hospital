@@ -36,7 +36,6 @@ class System {
     void addSubsystem(Subsystem* s);
 
     float oneDayPerformance();
-    bool validateConstraint();
     void displayPlan();
 };
 

@@ -7,9 +7,6 @@ vector<Patient*> System::readPatientData(string file) {
     string line;
     getline(f, line);  // Skip the header line
 
-    random_device rd;
-    mt19937 gen(rd());
-
     // Read all lines from the file
     while (getline(f, line)) {
         if (line.empty()) continue;  // Skip empty lines if any
@@ -40,7 +37,7 @@ vector<Patient*> System::readPatientData(string file) {
         int minutes = stoi(time.substr(3, 2));
         int added = hours * 60 + minutes;
 
-        if (added > 1080) continue;
+        if (added < 600 || added > 1080) continue;
 
         Patient* p = new Patient(allPatient.size() + 1, added);
         allPatient.push_back(p);
@@ -120,23 +117,4 @@ float System::oneDayPerformance() {
     // printf("  Total Performance: %.1f\n", performance);
 
     return performance;
-}
-
-bool System::validateConstraint() {
-    /* Maximum delay time */
-    for (auto& v : vehicles) {
-        for (int i = 1; i < v->realDeptTime.size(); i++) {
-            int delayTime = v->returnTime[i - 1] - v->idealDeptTime[i];
-            if (delayTime >= maxDelay) {
-                return false;
-            }
-        }
-    }
-
-    /* Maximum miss rate */
-    if (missRate >= maxMissRate) {
-        return false;
-    }
-
-    return true;
 }

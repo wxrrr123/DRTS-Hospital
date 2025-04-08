@@ -4,6 +4,7 @@
 #include <bits/stdc++.h>
 
 #include <atomic>
+#include <boost/random/sobol.hpp>
 #include <mutex>
 #include <random>
 #include <thread>
@@ -26,10 +27,10 @@ class GA {
     const int endTime = 1080;   // 18:00
     const int capacity = 15;
     const int tripNum = 4;
-    const int vehNum = 8;
+    const int vehNum = 5;
     const int sampleNum = 100;
     vector<Patient*> allPatients;
-    vector<int> assign = {2, 2, 2, 1, 1};
+    vector<int> assign = {1, 1, 1, 1, 1};
     vector<vector<int>> schedule;
 
     /* GA parameters */

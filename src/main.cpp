@@ -15,6 +15,7 @@ int main() {
     // Read all patient data once
     System S;
     ga.allPatients = S.readPatientData("./data/DLtimestamp.csv");
+    cout << ga.allPatients.size() << " patients loaded.\n\n";
 
     cout << ">>> GENERATION 0 <<<\n";
     ga.init();
@@ -31,12 +32,17 @@ int main() {
     ga.showBestAssignment();
 
     auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double, ratio<3600>> duration = end - start;
-    cout << "\nTime Consumed: " << duration.count() << " hours" << endl;
+    chrono::duration<double, ratio<60>> duration = end - start;
+    cout << "\nTime Consumed: " << duration.count() / 60 << " hours " << duration.count() % 60 << " minutes\n";
 
     ga.testBestAssignment();
 
     for (auto& p : ga.allPatients) delete p;
+
+    int retCode = system("python ./scripts/visualize.py");
+    if (retCode) {
+        cerr << "Error: Visualization script failed with return code " << retCode << endl;
+    }
 
     return 0;
 }

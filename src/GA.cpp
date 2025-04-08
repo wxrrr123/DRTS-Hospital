@@ -183,10 +183,22 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         random_device rd;
         mt19937 gen(rd());
         uniform_int_distribution<> dis(0, allPatients.size() - 1);
-        unordered_set<int> selectedIdx;
-        while (selectedIdx.size() < sampleNum) {
-            selectedIdx.insert(dis(gen));
+
+        boost::random::sobol sobol_engine(1);
+        unsigned int offset = static_cast<unsigned int>(dis(gen) % generation);
+        for (unsigned int i = 0; i < offset; ++i) {
+            vector<double> temp_sample(1);
+            sobol_engine.generate(temp_sample.begin(), temp_sample.end());
         }
+        
+        vector<double> sample(1);
+        unordered_set<int> selectedIdx;
+        do {
+            sobol_engine.generate(sample.begin(), sample.end());
+            sample[0] /= static_cast<double>(ULLONG_MAX);  // Normalize to [0, 1)
+            selectedIdx.insert(sample[0] * allPatients.size());
+        } while (selectedIdx.size() < sampleNum);
+        
         int patientIdx = 1;
         for (int idx : selectedIdx) {
             Patient* p = new Patient(patientIdx++, allPatients[idx]->addedTime);
@@ -303,6 +315,6 @@ void GA::testBestAssignment() {
     for (int i = 0; i < 100; i++) {
         totalFit += sysDesignEval(assign, bestSchedule);
     }
-    cout << "\n Best Result Test: ";
+    cout << "\n>>> Best Result Test: ";
     cout << totalFit / 100 << endl;
 }
