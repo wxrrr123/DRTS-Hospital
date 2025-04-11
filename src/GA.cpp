@@ -5,7 +5,6 @@ void GA::init() {
     mt19937 gen(rd());
     uniform_int_distribution<int> dist(0, (1 << (bitNum - 1)) - 1);
 
-    float totalFit = 0;
     for (int i = 0; i < chromNum; i++) {
         // Store unique random integers standing for dept time
         vector<int> dept;
@@ -32,13 +31,10 @@ void GA::selection() {
 
     // Linear ranking selection
     vector<float> rankedWeight(chromNum);
-    for (int i = 1; i <= chromNum; i++) {
-        rankedWeight[i] = 2 - sp + 2 * (sp - 1) * (i - 1) / (chromNum - 1);
-    }
-
     float totalFitness = 0;
-    for (int i = 0; i < chromNum; i++) {
-        totalFitness += rankedWeight[i];  // Sum of all fitnesses
+    for (int i = 1; i <= chromNum; i++) {
+        rankedWeight[i - 1] = 2 - sp + 2 * (sp - 1) * (i - 1) / (chromNum - 1);
+        totalFitness += rankedWeight[i - 1];  // Sum of all fitnesses
     }
 
     // Calculate selection probability for each chromosome
@@ -175,7 +171,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
     for (int d = 0; d < dayNum; d++) {
         System* S = new System();
 
-        /* initiate system */
+        /* Initiate system */
         S->assign = assign;
         S->schedule = schedule;
 
@@ -184,21 +180,29 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         mt19937 gen(rd());
         uniform_int_distribution<> dis(0, allPatients.size() - 1);
 
-        boost::random::sobol sobol_engine(1);
-        unsigned int offset = static_cast<unsigned int>(dis(gen) % generation);
-        for (unsigned int i = 0; i < offset; ++i) {
-            vector<double> temp_sample(1);
-            sobol_engine.generate(temp_sample.begin(), temp_sample.end());
-        }
-        
-        vector<double> sample(1);
         unordered_set<int> selectedIdx;
-        do {
-            sobol_engine.generate(sample.begin(), sample.end());
-            sample[0] /= static_cast<double>(ULLONG_MAX);  // Normalize to [0, 1)
-            selectedIdx.insert(sample[0] * allPatients.size());
-        } while (selectedIdx.size() < sampleNum);
-        
+        if (isQuasi == 0) {
+            while (selectedIdx.size() < sampleNum) {
+                selectedIdx.insert(dis(gen));
+            }
+        } else {
+            boost::random::sobol sobol_engine(1);
+            int offset = dis(gen) % generation;
+
+            // Generate offset samples to skip the first few points
+            vector<double> tmp_sample(1);
+            for (int i = 0; i < offset; ++i) {
+                sobol_engine.generate(tmp_sample.begin(), tmp_sample.end());
+            }
+
+            vector<double> sample(1);
+            while (selectedIdx.size() < sampleNum) {
+                sobol_engine.generate(sample.begin(), sample.end());
+                sample[0] /= (double)ULLONG_MAX;  // Normalize to [0, 1)
+                selectedIdx.insert(sample[0] * allPatients.size());
+            }
+        }
+
         int patientIdx = 1;
         for (int idx : selectedIdx) {
             Patient* p = new Patient(patientIdx++, allPatients[idx]->addedTime);
@@ -212,7 +216,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
             S->addVehicle(v);
         }
 
-        /* initiate subsystem */
+        /* Initiate subsystem */
         int vehId = 0;
         for (int i = 0; i < regionNum; i++) {
             Subsystem* s = new Subsystem(i + 1, startTime, endTime);
@@ -234,7 +238,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
         // S->displayPlan();
         totalKPI += S->oneDayPerformance();
 
-        /* destruction */
+        /* Destruction */
         for (auto& p : S->patients) delete p;
         S->patients.clear();
 
@@ -252,27 +256,20 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
 
 void GA::simulation() {
     cout << "Processing..." << endl;
-    int i = 1;
+
     float totalFit = 0;
     mutex mtx;
+    
+    counting_semaphore<INT_MAX> sem(threadNum);  // Semaphore to control thread count
     vector<thread> threads;
-
+    
     for (auto& chrom : pop) {
+        sem.acquire();  // Acquire a slot for a new thread
+
         threads.push_back(thread([&]() {
             // Calculate fitness in each thread
             vector<vector<int>> schedule = chrom2sche(assign, chrom);
             chrom.fit = sysDesignEval(assign, schedule);
-
-            // Print the chromosome and its fitness
-            // {
-            //     lock_guard<mutex> lock(mtx);  // Protect access to cout
-            //     cout << "Chromosome " << i++ << " => ";
-            //     for (auto& gene : chrom.genes) {
-            //         for (auto bit : gene) cout << bit;
-            //         cout << " ";
-            //     }
-            //     cout << "Fitness = " << chrom.fit << endl;
-            // }
 
             // Update total fitness
             {
@@ -288,6 +285,8 @@ void GA::simulation() {
                     bestSchedule = schedule;
                 }
             }
+
+            sem.release();  // Release the slot after thread finishes
         }));
     }
 

@@ -33,7 +33,7 @@ int main() {
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, ratio<60>> duration = end - start;
-    cout << "\nTime Consumed: " << duration.count() / 60 << " hours " << duration.count() % 60 << " minutes\n";
+    cout << "\nTime Consumed: " << (int)duration.count() / 60 << " hours " << fmod(duration.count(), 60.0) << " minutes\n";
 
     ga.testBestAssignment();
 

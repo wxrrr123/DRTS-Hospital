@@ -79,25 +79,20 @@ float System::oneDayPerformance() {
     
     int totalWaitingTime = 0, totalRetPatient = 0;
     for (auto& p : patients) {
-        if (p->returned) {
-            totalWaitingTime += p->getOnVehicleTime - p->addedTime;
+        if (p->isReturned) {
+            totalWaitingTime += p->getOnTime - p->addedTime;
             totalRetPatient++;
         }
     }
-    avgWaitingTime = totalRetPatient ? totalWaitingTime / totalRetPatient : 0;
+    avgWaitTime = totalRetPatient ? totalWaitingTime / totalRetPatient : 0;
 
     /* calculate the total return time of missed patients (60 km/hr) */
-    int missedPatients = patients.size() - totalRetPatient;
     for (auto& p : patients) {
-        if (!p->returned) {
+        if (!p->isReturned) {
             auto [x, y] = p->dest;
             totalRetTime += round(sqrt(x * x + y * y));
         }
     }
-
-    missRate = (float)missedPatients / (float)patients.size();
-
-    int noServVeh = vehicles.size() * vehicles.front()->tripNum - totalDeptTimes;
 
     int totalDelayTime = 0;
     for (auto& v : vehicles) {
@@ -107,11 +102,11 @@ float System::oneDayPerformance() {
     }
 
     /* New Performance */
-    performance = avgIdleTime + 1.5 * avgWaitingTime + totalRetTime + 10 * totalDelayTime;
+    performance = avgIdleTime + 10 * totalDelayTime + 1.5 * avgWaitTime + totalRetTime;
 
     // printf("> Performances\n");
     // printf("  Idle Time: %02d:%02d\n", avgIdleTime / 60, avgIdleTime % 60);
-    // printf("  Average Waiting Time: %02d:%02d\n", avgWaitingTime / 60, avgWaitingTime % 60);
+    // printf("  Average Waiting Time: %02d:%02d\n", avgWaitTime / 60, avgWaitTime % 60);
     // printf("  Missed Patients: %d people\n", missedPatients);
     // printf("  Total Return Time of Missed Patients: %02d:%02d\n", totalRetTime / 60, totalRetTime % 60);
     // printf("  Total Performance: %.1f\n", performance);

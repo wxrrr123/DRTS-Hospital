@@ -39,12 +39,12 @@ void Subsystem::oneDaySimulation() {
                 // printf("\nVehicle %d at clock: %02d:%02d\n", v->id, clock / 60, clock % 60);
 
                 /* Add patients into vehicles */
-                while (!waitingLine.empty() && v->patients.size() <= v->capacity) {
+                while (!waitingLine.empty() && v->passengers.size() <= v->capacity) {
                     Patient* firstPatient = waitingLine.front();
-                    firstPatient->getOnVehicleTime = clock;
+                    firstPatient->getOnTime = clock;
 
-                    v->patients.push_back(firstPatient);
-                    firstPatient->returned = true;
+                    v->passengers.push_back(firstPatient);
+                    firstPatient->isReturned = true;
 
                     waitingLine.pop_front();
 
@@ -59,7 +59,7 @@ void Subsystem::oneDaySimulation() {
                 availVeh.pop();
                 onServVeh.push_back(v);
                 v->predictReturnTime();
-                v->patients.clear();
+                v->passengers.clear();
                 t++;
             } else
                 break;

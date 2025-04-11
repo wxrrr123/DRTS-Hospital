@@ -9,7 +9,7 @@ void Vehicle::predictReturnTime() {
     vector<pair<int, Patient *>> distances;
 
     /* Distances from the hospital */
-    for (auto &p : patients) {
+    for (auto &p : passengers) {
         auto [x, y] = p->dest;
         distances.push_back({round(sqrt(x * x + y * y)), p});
     }

@@ -12,9 +12,9 @@ class Patient {
     int id;
     pair<int, int> dest;
     int addedTime;
-    int getOnVehicleTime;
+    int getOnTime;
     int region;
-    bool returned;
+    bool isReturned;
 
     map<int, vector<float>> areaProb = {{1, {65, 25, 10}},
                                         {2, {47.71, 30.27, 11.92, 3.67, 0.92, 4.59, 0.92}},

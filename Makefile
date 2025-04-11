@@ -2,7 +2,7 @@ SRC_DIR := src
 BIN_DIR := bin
 OUT_DIR := output
 
-CXXFLAGS := -std=c++17 -Iinclude -pthread -O3
+CXXFLAGS := -std=c++20 -Iinclude -pthread -O3
 TIMESTAMP := $(shell date +"%Y%m%d_%H%M%S")
 
 EXE_FILE := $(BIN_DIR)/DRTS

@@ -21,7 +21,7 @@ class Subsystem {
     vector<Vehicle*> fleet;
     deque<Patient*> waitingLine;
 
-    /* initiate */
+    /* Initiate */
     Subsystem(int id, int sT, int eT) : id(id), startTime(sT), endTime(eT) {}
     void addPatient(Patient* p);
     void addVehicle(Vehicle* v);

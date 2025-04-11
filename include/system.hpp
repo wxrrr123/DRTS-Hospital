@@ -18,15 +18,9 @@ class System {
 
     /* performances */
     int avgIdleTime = 0;
-    int avgWaitingTime = 0;
+    int avgWaitTime = 0;
     int totalRetTime = 0;
-    float missRate = 0;
     float performance = 0;
-
-    /* constraints */
-    int maxDelay = 30;
-    // int indivWaitingTime = 120;
-    float maxMissRate = 0.25;
 
     /* initiate */
     System() {};

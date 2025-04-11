@@ -31,6 +31,7 @@ with open(filename, 'r') as file:
 
 plt.plot(range(len(average_fitness)), average_fitness, 'o-', label="Average Fitness", color="blue")
 plt.plot(range(len(best_ever_fitness)), best_ever_fitness, 's--', label="Best Ever Fitness", color="red")
+plt.ylim(100, 1200)
 plt.title("Fitness Over Generations")
 plt.xlabel("Generation")
 plt.ylabel("Fitness")

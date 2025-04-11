@@ -1,7 +1,7 @@
 #include "patient.hpp"
 
 Patient::Patient(int id, int added)
-    : id(id), dest(dest), addedTime(added), getOnVehicleTime(0), region(0), returned(false) {}
+    : id(id), dest({0, 0}), addedTime(added), getOnTime(0), region(0), isReturned(false) {}
 
 void Patient::setRegion() {
     random_device rd;

@@ -10,7 +10,7 @@ class Vehicle {
     int id;
     int capacity;
     int tripNum;
-    vector<Patient*> patients;
+    vector<Patient*> passengers;
     vector<int> idealDeptTime;
     vector<int> realDeptTime;
     vector<int> returnTime;
