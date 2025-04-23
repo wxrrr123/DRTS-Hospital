@@ -23,6 +23,14 @@ void GA::init() {
         }
         pop.push_back(chrom);  // Add the chromosome to the population
     }
+
+    // Initialize quasiOffset for quasi-random sampling
+    if (isQuasi) {
+        uniform_int_distribution<int> quasi_dist(0, generation - 1);
+        for (int i = 0; i < dayNum; i++) {
+            quasiOffset.push_back(quasi_dist(gen));  // Generate a random offset for each day
+        }
+    }
 }
 
 void GA::selection() {
@@ -130,6 +138,20 @@ float GA::totalPerformance(float totalKPI) {
     return totalKPI / dayNum;
 }
 
+Chromo GA::str2chrom(string& str) {
+    Chromo chrom;
+
+    for (int i = 0; i < str.size(); i += bitNum) {
+        vector<bool> gene;
+        for (int j = 0; j < bitNum && i + j < str.size(); j++) {
+            gene.push_back(str[i + j] == '1');
+        }
+        chrom.genes.push_back(gene);
+    }
+
+    return chrom;
+}
+
 vector<vector<int>> GA::chrom2sche(vector<int>& assign, Chromo& chrom) {
     vector<vector<int>> sche(regionNum);
 
@@ -187,7 +209,8 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule) {
             }
         } else {
             boost::random::sobol sobol_engine(1);
-            int offset = dis(gen) % generation;
+            // int offset = dis(gen) % generation;
+            int offset = quasiOffset[d];
 
             // Generate offset samples to skip the first few points
             vector<double> tmp_sample(1);
@@ -295,7 +318,14 @@ void GA::simulation() {
     }
 
     printf("Average Fitness = %.3f\n", totalFit / chromNum);
-    printf("Best Ever Fitness = %.3f\n", bestChrom.fit);
+    printf("Best Chrom = ");
+    for (auto& gene : bestChrom.genes) {
+        for (bool bit : gene) {
+            cout << bit ? "1" : "0";
+        }
+        cout << " ";
+    }
+    printf("\nBest Ever Fitness = %.3f\n", bestChrom.fit);
 }
 
 void GA::showBestAssignment() {

@@ -47,6 +47,7 @@ class GA {
     /* Experimental parameters */
     int threadNum = chromNum;
     int isQuasi = 1;  // 0: uniform, 1: quasi
+    vector<int> quasiOffset;
 
     vector<Chromo> pop;
     vector<Chromo> candidates;
@@ -60,6 +61,7 @@ class GA {
     void crossover();
     void mutation();
 
+    Chromo str2chrom(string& str);
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
     float totalPerformance(float totalKPI);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
