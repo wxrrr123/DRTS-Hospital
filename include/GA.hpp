@@ -17,12 +17,15 @@ using namespace std;
 struct Chromo {
     vector<vector<bool>> genes;
     float fit;
+    float stdev;
+    vector<int> dayNum;
+    vector<float> metrics;
 };
 
 class GA {
   public:
     /* Input dataset */
-    int dayNum = 200;
+    int initDayNum = 80;
     int regionNum = 5;
     int startTime = 600;  // 10:00
     int endTime = 1080;   // 18:00
@@ -33,7 +36,7 @@ class GA {
     vector<Patient*> allPatients;
     vector<int> assign = {1, 1, 1, 1, 1};
     vector<vector<int>> schedule;
-
+    
     /* GA parameters */
     int generation = 2000;
     int chromNum = 30;
@@ -64,10 +67,12 @@ class GA {
     Chromo str2chrom(string& str);
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
     float totalPerformance(float totalKPI);
-    float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule);
+    float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chromo& chrom);
     void simulation();
     void showBestAssignment();
     void testBestAssignment();
+
+    void ocba();
 };
 
 #endif  // GA_HPP
