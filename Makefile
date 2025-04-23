@@ -11,7 +11,7 @@ OUT_FILE := $(OUT_DIR)/$(TIMESTAMP).txt
 
 .PHONY: all build run clean
 
-all: build run
+all: clean build run
 
 build: $(EXE_FILE)
 

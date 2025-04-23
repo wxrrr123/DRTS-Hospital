@@ -28,12 +28,12 @@ void GA::init() {
     }
 
     // Initialize quasiOffset for quasi-random sampling
-    if (isQuasi) {
-        uniform_int_distribution<int> quasi_dist(0, generation - 1);
-        for (int i = 0; i < dayNum; i++) {
-            quasiOffset.push_back(quasi_dist(gen));  // Generate a random offset for each day
-        }
-    }
+    // if (isQuasi) {
+    //     uniform_int_distribution<int> quasi_dist(0, generation - 1);
+    //     for (int i = 0; i < dayNum; i++) {
+    //         quasiOffset.push_back(quasi_dist(gen));  // Generate a random offset for each day
+    //     }
+    // }
 }
 
 void GA::selection() {
@@ -290,9 +290,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chro
 void GA::simulation() {
     cout << "Processing..." << endl;
 
-    float totalFit = 0;
     mutex mtx;
-
     counting_semaphore<INT_MAX> sem(threadNum);  // Semaphore to control thread count
     vector<thread> threads;
 
@@ -304,12 +302,6 @@ void GA::simulation() {
                 // Calculate fitness in each thread
                 vector<vector<int>> schedule = chrom2sche(assign, chrom);
                 chrom.fit = sysDesignEval(assign, schedule, chrom);
-
-                // Update total fitness
-                {
-                    lock_guard<mutex> lock(mtx);  // Protect access to totalFit
-                    totalFit += chrom.fit;
-                }
 
                 // Update the best chromosome
                 {
@@ -333,6 +325,13 @@ void GA::simulation() {
         ocba();
     }
 
+    float totalFit = 0;
+    for (auto& chrom : pop) {
+        chrom.dayNum.clear();
+        chrom.metrics.clear();
+        chrom.dayNum.push_back(initDayNum);  // Reset the number of days for the chromosome
+        totalFit += chrom.fit;  // Sum of all fitnesses
+    }
     printf("Average Fitness = %.3f\n", totalFit / chromNum);
     printf("Best Chrom = ");
     for (auto& gene : bestChrom.genes) {
@@ -358,7 +357,7 @@ void GA::showBestAssignment() {
 void GA::testBestAssignment() {
     float totalFit = 0;
     for (int i = 0; i < 100; i++) {
-        totalFit += sysDesignEval(assign, bestSchedule);
+        totalFit += sysDesignEval(assign, bestSchedule, (Chromo&)bestChrom);
     }
     cout << "\n>>> Best Result Test: ";
     cout << totalFit / 100 << endl;
@@ -369,11 +368,11 @@ void GA::ocba() {
     vector<float> means, variances;
     for (auto& chrom : pop) {
         means.push_back(chrom.fit);                        // 平均適應值
-        variances.push_back(chrom.stdFit * chrom.stdFit);  // 變異數 (標準差平方)
+        variances.push_back(chrom.stdev * chrom.stdev);  // 變異數 (標準差平方)
     }
 
     // 剩餘的資源分配預算，包含初始分配的資源
-    int remaining_budget = total_budget + accumulate(initial_allocations.begin(), initial_allocations.end(), 0);
+    int remaining_budget = 400 + 80 * chromNum;
 
     // 初始化每個染色體的分配狀態，1 表示仍然活躍可分配
     vector<int> active_allocations(chromNum, 1);
@@ -436,8 +435,8 @@ void GA::ocba() {
                 allocations[i] = static_cast<int>(adjusted_budget / ratio_sum * allocation_ratios[i]);
 
                 // 如果分配的資源少於初始分配，則將其設為初始分配並標記為非活躍
-                if (allocations[i] < initial_allocations[i]) {
-                    allocations[i] = initial_allocations[i];
+                if (allocations[i] < 80) {
+                    allocations[i] = 80;
                     active_allocations[i] = 0;
                     more_allocations = true;
                 }
@@ -461,8 +460,10 @@ void GA::ocba() {
 
     // 計算每個染色體的額外分配資源數量
     for (int i = 0; i < chromNum; ++i) {
-        allocations[i] -= initial_allocations[i];
+        allocations[i] -= 80;
         pop[i].dayNum.push_back(allocations[i]);  // 更新染色體的分配資源數量
-        cout << "Chromosome " << i << " allocated " << allocations[i] << " additional resources." << endl;
+        if (allocations[i])
+            cout << "Chromosome " << i << " allocated " << allocations[i] << " additional resources." << endl;
     }
+    cout << endl;
 }

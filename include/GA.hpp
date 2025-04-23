@@ -49,7 +49,7 @@ class GA {
 
     /* Experimental parameters */
     int threadNum = chromNum;
-    int isQuasi = 1;  // 0: uniform, 1: quasi
+    int isQuasi = 0;  // 0: uniform, 1: quasi
     vector<int> quasiOffset;
 
     vector<Chromo> pop;
@@ -66,7 +66,7 @@ class GA {
 
     Chromo str2chrom(string& str);
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
-    float totalPerformance(float totalKPI);
+    float totalPerformance(Chromo& chrom);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chromo& chrom);
     void simulation();
     void showBestAssignment();
