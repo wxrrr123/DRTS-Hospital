@@ -1,79 +1,87 @@
 import re
 import os
 
-def analyze_best_ever_in_folder(folder_path, generations_no_improve=500):
+def analyze_generation_in_folder(folder_path, target_gen):
     best_ever_pattern = re.compile(r"Best Ever Fitness = ([\d.]+)")
     generation_pattern = re.compile(r">>> GENERATION (\d+) <<<")
     time_consumed_pattern = re.compile(r"Time Consumed = ([\d.]+) min")
-    best_chrom_pattern = re.compile(r"Best Chrom = ([01 ]+)")
-
-    all_best_chroms = []
+    best_result_test_pattern = re.compile(r">>> Best Result Test: ([\d.]+)")
 
     for file_name in os.listdir(folder_path):
         if file_name.endswith(".txt"):
             file_path = os.path.join(folder_path, file_name)
             print(f"File: {file_name}")
             
-            best_ever_first_gen = None
-            best_ever_value = None
-            last_improvement_gen = None
-            last_improvement_time = None
-            best_chrom = None
-            current_gen = None
-            consecutive_no_improve = 0
-
             with open(file_path, 'r') as file:
                 lines = file.readlines()
 
+            current_gen = None
+            found_target_gen = False
+            target_gen_best_ever_value = None
+            best_ever_values_by_gen = {}  # To track best ever values by generation
+            
+            # First pass: Find the best ever value at target generation
             for line in lines:
-                # Match generation number
                 gen_match = generation_pattern.search(line)
                 if gen_match:
                     current_gen = int(gen_match.group(1))
                 
-                # Match Best Ever Fitness
+                if current_gen == target_gen:
+                    found_target_gen = True
+                    best_match = best_ever_pattern.search(line)
+                    if best_match:
+                        target_gen_best_ever_value = float(best_match.group(1))
+            
+            if not found_target_gen or target_gen_best_ever_value is None:
+                print(f"Generation {target_gen} not found or no Best Ever Fitness value found.")
+                print("-" * 50)
+                continue
+            
+            # Second pass: Find when this best ever value first appeared
+            current_gen = None
+            first_appeared_gen = None
+            time_at_target_gen = None
+            
+            for line in lines:
+                gen_match = generation_pattern.search(line)
+                if gen_match:
+                    current_gen = int(gen_match.group(1))
+                
+                # Record best ever value for each generation
                 best_match = best_ever_pattern.search(line)
-                if best_match:
-                    current_best = float(best_match.group(1))
-                    if best_ever_value is None or current_best < best_ever_value:
-                        best_ever_value = current_best
-                        best_ever_first_gen = current_gen
-                        last_improvement_gen = current_gen
-                        consecutive_no_improve = 0
-                    elif current_best == best_ever_value:
-                        consecutive_no_improve += 1
-                    else:
-                        consecutive_no_improve = 0
-
-                # Match Time Consumed
-                time_match = time_consumed_pattern.search(line)
-                if time_match and current_gen == last_improvement_gen:
-                    last_improvement_time = float(time_match.group(1))
-
-                # Match Best Chrom
-                chrom_match = best_chrom_pattern.search(line)
-                if chrom_match:
-                    best_chrom = chrom_match.group(1).replace(" ", "")
-
-                if consecutive_no_improve >= generations_no_improve:
-                    if best_chrom and best_chrom not in all_best_chroms:
-                        all_best_chroms.append(best_chrom)
-                    print(f"Best Ever Fitness: {best_ever_value}")
-                    print(f"Time Consumed: {last_improvement_time} min")
-                    print(f"First Appeared At Generation: {best_ever_first_gen}")
-                    print(f"Last Improvement Generation: {last_improvement_gen}")
-                    break
-            else:
-                if best_chrom and best_chrom not in all_best_chroms:
-                    all_best_chroms.append(best_chrom)
-                print(f"Best Ever Fitness: {best_ever_value}")
-                print(f"Time Consumed: {last_improvement_time} min")
-                print(f"First Appeared At Generation: {best_ever_first_gen}")
-                print(f"Last Improvement Generation: {last_improvement_gen}")
+                if best_match and current_gen is not None:
+                    best_ever_value = float(best_match.group(1))
+                    best_ever_values_by_gen[current_gen] = best_ever_value
+                    
+                    # If this matches our target value and we haven't found the first appearance yet
+                    if best_ever_value == target_gen_best_ever_value and first_appeared_gen is None:
+                        first_appeared_gen = current_gen
+                
+                # Capture time at target generation
+                if current_gen == target_gen:
+                    time_match = time_consumed_pattern.search(line)
+                    if time_match:
+                        time_at_target_gen = time_match.group(1)
+            
+            # Check for Best Result Test in the file
+            best_result_value = None
+            for line in lines:
+                best_result_match = best_result_test_pattern.search(line)
+                if best_result_match:
+                    best_result_value = best_result_match.group(1)
+            
+            # Output results
+            print(f"Best Ever Fitness at Generation {target_gen}: {target_gen_best_ever_value}")
+            if time_at_target_gen:
+                print(f"Time Consumed at Generation {target_gen}: {time_at_target_gen} min")
+            if first_appeared_gen:
+                print(f"First Appeared At Generation: {first_appeared_gen}")
+            if best_result_value:
+                print(f"Best Result Test: {best_result_value}")
+            
             print("-" * 50)
 
-    print("All Best Chroms:")
-    print(",\n".join(f'"{chrom}"' for chrom in all_best_chroms))
-
-folder_path = "output"
-analyze_best_ever_in_folder(folder_path)
+# Example usage
+folder_path = "useful_output/ocba_300_12"
+target_gen = int(input("Enter the generation number to analyze: "))
+analyze_generation_in_folder(folder_path, target_gen)

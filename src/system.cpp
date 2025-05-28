@@ -1,51 +1,5 @@
 #include "system.hpp"
 
-vector<Patient*> System::readPatientData(string file) {
-    vector<Patient*> allPatient;
-
-    ifstream f(file);
-    string line;
-    getline(f, line);  // Skip the header line
-
-    // Read all lines from the file
-    while (getline(f, line)) {
-        if (line.empty()) continue;  // Skip empty lines if any
-
-        istringstream iss(line);
-        string dept, temp, added_str;
-
-        // Read department (dept)
-        if (!getline(iss, dept, ',')) continue;
-
-        // Skip intermediate fields
-        for (int j = 0; j < 5; ++j) {
-            if (!getline(iss, temp, ',')) break;
-        }
-
-        // Read medication time (added)
-        if (!getline(iss, added_str, ',')) continue;
-
-        // Check if department or medication time is empty
-        if (dept.empty() || added_str.empty()) continue;
-
-        // Convert medication time to minutes (assuming format is HH:MM)
-        istringstream added_iss(added_str);
-        string date, time;
-        getline(added_iss, date, ' ');
-        getline(added_iss, time);
-        int hours = stoi(time.substr(0, 2));
-        int minutes = stoi(time.substr(3, 2));
-        int added = hours * 60 + minutes;
-
-        if (added < 600 || added > 1080) continue;
-
-        Patient* p = new Patient(allPatient.size() + 1, added);
-        allPatient.push_back(p);
-    }
-
-    return allPatient;
-}
-
 void System::addPatient(Patient* p) { patients.push_back(p); }
 
 void System::addVehicle(Vehicle* v) { vehicles.push_back(v); }
@@ -75,7 +29,7 @@ float System::oneDayPerformance() {
         }
         totalDeptTimes += v->realDeptTime.size();
     }
-    avgIdleTime = totalIdleTime / totalDeptTimes;
+    avgIdleTime = totalDeptTimes ? (float)totalIdleTime / totalDeptTimes : 0.0;
     
     int totalWaitingTime = 0, totalRetPatient = 0;
     for (auto& p : patients) {
@@ -84,7 +38,7 @@ float System::oneDayPerformance() {
             totalRetPatient++;
         }
     }
-    avgWaitTime = totalRetPatient ? totalWaitingTime / totalRetPatient : 0;
+    avgWaitTime = totalRetPatient ? (float)totalWaitingTime / totalRetPatient : 0.0;
 
     /* calculate the total return time of missed patients (60 km/hr) */
     for (auto& p : patients) {

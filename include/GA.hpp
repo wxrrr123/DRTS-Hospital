@@ -16,16 +16,16 @@ using namespace std;
 
 struct Chromo {
     vector<vector<bool>> genes;
-    float fit;
-    float stdev;
-    vector<int> dayNum;
-    vector<float> metrics;
+    float fit;              // mean
+    float var;              // variance
+    int currDayNum;         // number of days for simulation in this generation
+    vector<float> metrics;  // metrics for each day
 };
 
 class GA {
   public:
     /* Input dataset */
-    int initDayNum = 80;
+    int dayNum = 200;
     int regionNum = 5;
     int startTime = 600;  // 10:00
     int endTime = 1080;   // 18:00
@@ -36,9 +36,10 @@ class GA {
     vector<Patient*> allPatients;
     vector<int> assign = {1, 1, 1, 1, 1};
     vector<vector<int>> schedule;
-    
+
     /* GA parameters */
     int generation = 2000;
+    int noImproveMax = 800;
     int chromNum = 30;
     int geneNum = tripNum * vehNum;
     int bitNum = 2;  // {bit:min} = {"00": +40min, "01": +75min, "10": +110min, "11": +150min}
@@ -48,9 +49,14 @@ class GA {
     float pm = 0.005;  // mutation probability
 
     /* Experimental parameters */
-    int threadNum = chromNum;
-    int isQuasi = 0;  // 0: uniform, 1: quasi
+    int threadNum = chromNum;  // number of threads for simulation
+    int isQuasi = 0;           // 0: uniform, 1: quasi
     vector<int> quasiOffset;
+
+    /* OCBA parameters */
+    int initDayNum = 80;
+    int distribution = 300;
+    int distriCnt = (dayNum - initDayNum) * chromNum / distribution;
 
     vector<Chromo> pop;
     vector<Chromo> candidates;
@@ -59,6 +65,7 @@ class GA {
     vector<vector<int>> bestSchedule;
 
     GA() {};
+    void readAllPatients(string file);
     void init();
     void selection();
     void crossover();
@@ -66,9 +73,11 @@ class GA {
 
     Chromo str2chrom(string& str);
     vector<vector<int>> chrom2sche(vector<int>& assign, Chromo& chrom);
-    float totalPerformance(Chromo& chrom);
+
+    float updatePerformance(Chromo& chrom);
     float sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chromo& chrom);
     void simulation();
+
     void showBestAssignment();
     void testBestAssignment();
 

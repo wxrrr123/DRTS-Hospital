@@ -24,4 +24,4 @@ run:
 	$(EXE_FILE) > $(OUT_FILE)
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm -rf $(BIN_DIR)/*

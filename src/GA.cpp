@@ -1,5 +1,47 @@
 #include "GA.hpp"
 
+void GA::readAllPatients(string file) {
+    ifstream f(file);
+    string line;
+    getline(f, line);  // Skip the header line
+
+    // Read all lines from the file
+    while (getline(f, line)) {
+        if (line.empty()) continue;  // Skip empty lines if any
+
+        istringstream iss(line);
+        string dept, temp, added_str;
+
+        // Read department (dept)
+        if (!getline(iss, dept, ',')) continue;
+
+        // Skip intermediate fields
+        for (int j = 0; j < 5; ++j) {
+            if (!getline(iss, temp, ',')) break;
+        }
+
+        // Read medication time (added)
+        if (!getline(iss, added_str, ',')) continue;
+
+        // Check if department or medication time is empty
+        if (dept.empty() || added_str.empty()) continue;
+
+        // Convert medication time to minutes (assuming format is HH:MM)
+        istringstream added_iss(added_str);
+        string date, time;
+        getline(added_iss, date, ' ');
+        getline(added_iss, time);
+        int hours = stoi(time.substr(0, 2));
+        int minutes = stoi(time.substr(3, 2));
+        int added = hours * 60 + minutes;
+
+        if (added < startTime || added > endTime) continue;
+
+        Patient* p = new Patient(allPatients.size() + 1, added);
+        allPatients.push_back(p);
+    }
+}
+
 void GA::init() {
     random_device rd;
     mt19937 gen(rd());
@@ -22,18 +64,19 @@ void GA::init() {
             chrom.genes.push_back(gene);  // Add the binary gene to the chromosome
         }
 
-        chrom.dayNum.push_back(initDayNum);  // Initialize the number of days for the chromosome
+        // Initialize the number of days for the chromosome
+        chrom.currDayNum = initDayNum;
 
-        pop.push_back(chrom);  // Add the chromosome to the population
+        pop.push_back(chrom);
     }
 
     // Initialize quasiOffset for quasi-random sampling
-    // if (isQuasi) {
-    //     uniform_int_distribution<int> quasi_dist(0, generation - 1);
-    //     for (int i = 0; i < dayNum; i++) {
-    //         quasiOffset.push_back(quasi_dist(gen));  // Generate a random offset for each day
-    //     }
-    // }
+    if (isQuasi) {
+        uniform_int_distribution<int> quasi_dist(0, generation - 1);
+        for (int i = 0; i < dayNum; i++) {
+            quasiOffset.push_back(quasi_dist(gen));  // Generate a random offset for each day
+        }
+    }
 }
 
 void GA::selection() {
@@ -42,16 +85,16 @@ void GA::selection() {
 
     // Linear ranking selection
     vector<float> rankedWeight(chromNum);
-    float totalFitness = 0;
+    float totalWeight = 0;
     for (int i = 1; i <= chromNum; i++) {
         rankedWeight[i - 1] = 2 - sp + 2 * (sp - 1) * (i - 1) / (chromNum - 1);
-        totalFitness += rankedWeight[i - 1];  // Sum of all fitnesses
+        totalWeight += rankedWeight[i - 1];  // Sum of all fitnesses
     }
 
     // Calculate selection probability for each chromosome
     vector<float> selectProb(chromNum);
     for (int i = 0; i < chromNum; i++) {
-        selectProb[i] = rankedWeight[i] / totalFitness;  // Probability based on ranked weight
+        selectProb[i] = rankedWeight[i] / totalWeight;  // Probability based on ranked weight
     }
 
     // Calculate cumulative probability for selection
@@ -136,16 +179,16 @@ void GA::mutation() {
     }
 }
 
-float GA::totalPerformance(Chromo& chrom) {
-    float totalKPI = accumulate(chrom.metrics.begin(), chrom.metrics.end(), 0.0f);  // Sum of all metrics
-    float mean = totalKPI / chrom.metrics.size();
+float GA::updatePerformance(Chromo& chrom) {
+    float sum = accumulate(chrom.metrics.begin(), chrom.metrics.end(), 0.0);  // Sum of all metrics
+    float mean = sum / chrom.metrics.size();
 
-    // Variance calculation
+    // Variance calculation (not standard deviation)
     float var = 0;
     for (auto& metric : chrom.metrics) {
         var += pow(metric - mean, 2);
     }
-    chrom.stdev = sqrt(var / chrom.metrics.size() - 1);
+    chrom.var = var / chrom.metrics.size();  // Variance without taking the square root
 
     return mean;
 }
@@ -200,7 +243,7 @@ vector<vector<int>> GA::chrom2sche(vector<int>& assign, Chromo& chrom) {
 }
 
 float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chromo& chrom) {
-    for (int d = 0; d < chrom.dayNum.back(); d++) {
+    for (int d = 0; d < chrom.currDayNum; d++) {
         System* S = new System();
 
         /* Initiate system */
@@ -224,7 +267,7 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chro
 
             // Generate offset samples to skip the first few points
             vector<double> tmp_sample(1);
-            for (int i = 0; i < offset; ++i) {
+            for (int i = 0; i < offset; i++) {
                 sobol_engine.generate(tmp_sample.begin(), tmp_sample.end());
             }
 
@@ -284,30 +327,27 @@ float GA::sysDesignEval(vector<int>& assign, vector<vector<int>>& schedule, Chro
         delete S;
     }
 
-    return totalPerformance(chrom);
+    return updatePerformance(chrom);
 }
 
 void GA::simulation() {
-    cout << "Processing..." << endl;
-
     mutex mtx;
     counting_semaphore<INT_MAX> sem(threadNum);  // Semaphore to control thread count
     vector<thread> threads;
 
-    for (int i = 0; i < 9; i++) {
-        for (auto& chrom : pop) {
+    for (int i = 0; i <= distriCnt; i++) {
+        for (int idx = 0; idx < pop.size(); idx++) {
             sem.acquire();  // Acquire a slot for a new thread
 
-            threads.push_back(thread([&]() {
-                // Calculate fitness in each thread
-                vector<vector<int>> schedule = chrom2sche(assign, chrom);
-                chrom.fit = sysDesignEval(assign, schedule, chrom);
+            threads.push_back(thread([&, idx]() {
+                auto schedule = chrom2sche(assign, pop[idx]);
+                float fit = sysDesignEval(assign, schedule, pop[idx]);
+                pop[idx].fit = fit;
 
-                // Update the best chromosome
                 {
-                    lock_guard<mutex> lock(mtx);  // Protect access to bestChrom
-                    if (chrom.fit < bestChrom.fit) {
-                        bestChrom = chrom;
+                    lock_guard<mutex> lock(mtx);  // Protect access to shared data
+                    if (fit < bestChrom.fit) {
+                        bestChrom = pop[idx];
                         bestSchedule = schedule;
                     }
                 }
@@ -316,31 +356,22 @@ void GA::simulation() {
             }));
         }
 
-        for (auto& t : threads) {
-            t.join();
-        }
-
+        for (auto& t : threads) t.join();
         threads.clear();
 
-        ocba();
+        if (i < distriCnt) ocba();  // don't do in the last time
+    }
+
+    // Reset for the next generation
+    for (auto& chrom : pop) {
+        chrom.currDayNum = initDayNum;
+        chrom.metrics.clear();
     }
 
     float totalFit = 0;
-    for (auto& chrom : pop) {
-        chrom.dayNum.clear();
-        chrom.metrics.clear();
-        chrom.dayNum.push_back(initDayNum);  // Reset the number of days for the chromosome
-        totalFit += chrom.fit;  // Sum of all fitnesses
-    }
+    totalFit = accumulate(pop.begin(), pop.end(), 0.0, [](float sum, Chromo& chrom) { return sum + chrom.fit; });
     printf("Average Fitness = %.3f\n", totalFit / chromNum);
-    printf("Best Chrom = ");
-    for (auto& gene : bestChrom.genes) {
-        for (bool bit : gene) {
-            cout << bit ? "1" : "0";
-        }
-        cout << " ";
-    }
-    printf("\nBest Ever Fitness = %.3f\n", bestChrom.fit);
+    printf("Best Ever Fitness = %.3f\n", bestChrom.fit);
 }
 
 void GA::showBestAssignment() {
@@ -364,106 +395,87 @@ void GA::testBestAssignment() {
 }
 
 void GA::ocba() {
-    // 儲存每個染色體的平均適應值和變異數
-    vector<float> means, variances;
+    vector<float> means, vars;
     for (auto& chrom : pop) {
-        means.push_back(chrom.fit);                        // 平均適應值
-        variances.push_back(chrom.stdev * chrom.stdev);  // 變異數 (標準差平方)
+        means.push_back(chrom.fit);                      
+        vars.push_back(chrom.var);  
     }
 
-    // 剩餘的資源分配預算，包含初始分配的資源
-    int remaining_budget = 400 + 80 * chromNum;
+    int remBudget = distribution + initDayNum * chromNum;
+    vector<int> active(chromNum, 1);
+    vector<float> allocRatios(chromNum, 0.0);
+    vector<int> allocs(chromNum, 0);
 
-    // 初始化每個染色體的分配狀態，1 表示仍然活躍可分配
-    vector<int> active_allocations(chromNum, 1);
-
-    // 初始化每個染色體的分配比例
-    vector<float> allocation_ratios(chromNum, 0.0f);
-
-    // 初始化每個染色體的實際分配資源數量
-    vector<int> allocations(chromNum, 0);
-
-    // 找到適應值最低的染色體索引 (最佳染色體)
-    int best_index = distance(means.begin(), min_element(means.begin(), means.end()));
-
-    // 找到適應值次低的染色體索引 (次佳染色體)
-    int second_best_index = distance(means.begin(), min_element(means.begin(), means.end(), 
-                [&](float a, float b) { return a == means[best_index] ? true : a > b; }));
-
-    // 初始化次佳染色體的分配比例為 1
-    allocation_ratios[second_best_index] = 1.0f;
-
-    // 計算其他染色體的分配比例
-    for (int i = 0; i < chromNum; ++i) {
-        if (i != second_best_index && i != best_index) {
-            // 計算分配比例公式：
-            // ratio[i] = ((μ_best - μ_second_best) / (μ_best - μ_i))^2 * (σ_i^2 / σ_second_best^2)
-            float temp = (means[best_index] - means[second_best_index]) / (means[best_index] - means[i]);
-            allocation_ratios[i] = temp * temp * variances[i] / variances[second_best_index];
+    int bestIdx = 0, secondBestIdx = 0;
+    for (int i = 1; i < chromNum; i++) {
+        if (means[i] < means[bestIdx]) {
+            secondBestIdx = bestIdx;
+            bestIdx = i;
+        } else if (means[i] < means[secondBestIdx] || bestIdx == secondBestIdx) {
+            secondBestIdx = i;
         }
     }
 
-    // 計算最佳染色體的分配比例
-    // ratio[best] = sqrt(σ_best^2 * Σ (ratio[i]^2 / σ_i^2)), i ≠ best
-    float temp = 0.0f;
-    for (int i = 0; i < chromNum; ++i) {
-        if (i != best_index) {
-            temp += (allocation_ratios[i] * allocation_ratios[i] / variances[i]);
+    allocRatios[secondBestIdx] = 1.0;
+
+    for (int i = 0; i < chromNum; i++) {
+        if (i != secondBestIdx && i != bestIdx) {
+            float temp = (means[bestIdx] - means[secondBestIdx]) / (means[bestIdx] - means[i]);
+            allocRatios[i] = temp * temp * vars[i] / vars[secondBestIdx];
         }
     }
-    allocation_ratios[best_index] = sqrt(variances[best_index] * temp);
 
-    // 調整資源分配
-    int adjusted_budget = remaining_budget;
-    bool more_allocations;
+    float temp = 0.0;
+    for (int i = 0; i < chromNum; i++) {
+        if (i != bestIdx) {
+            temp += (allocRatios[i] * allocRatios[i] / vars[i]);
+        }
+    }
+    allocRatios[bestIdx] = sqrt(vars[bestIdx] * temp);
+
+    int adjBudget = remBudget;
+    bool moreAlloc;
     do {
-        more_allocations = false;
-        float ratio_sum = 0.0f;
+        moreAlloc = false;
+        float ratioSum = 0.0;
 
-        // 計算活躍染色體的分配比例總和
-        for (int i = 0; i < chromNum; ++i) {
-            if (active_allocations[i]) {
-                ratio_sum += allocation_ratios[i];
+        for (int i = 0; i < chromNum; i++) {
+            if (active[i]) {
+                ratioSum += allocRatios[i];
             }
         }
 
-        // 根據比例分配資源
-        for (int i = 0; i < chromNum; ++i) {
-            if (active_allocations[i]) {
-                // 分配公式：
-                // allocation[i] = (adjusted_budget / ratio_sum) * ratio[i]
-                allocations[i] = static_cast<int>(adjusted_budget / ratio_sum * allocation_ratios[i]);
+        for (int i = 0; i < chromNum; i++) {
+            if (active[i]) {
+                allocs[i] = (int)(adjBudget / ratioSum * allocRatios[i]);
 
-                // 如果分配的資源少於初始分配，則將其設為初始分配並標記為非活躍
-                if (allocations[i] < 80) {
-                    allocations[i] = 80;
-                    active_allocations[i] = 0;
-                    more_allocations = true;
+                if (allocs[i] < initDayNum) {
+                    allocs[i] = initDayNum;
+                    active[i] = 0;
+                    moreAlloc = true;
                 }
             }
         }
 
-        // 如果有染色體被標記為非活躍，更新剩餘預算
-        if (more_allocations) {
-            adjusted_budget = remaining_budget;
-            for (int i = 0; i < chromNum; ++i) {
-                if (!active_allocations[i]) {
-                    adjusted_budget -= allocations[i];
+        if (moreAlloc) {
+            adjBudget = remBudget;
+            for (int i = 0; i < chromNum; i++) {
+                if (!active[i]) {
+                    adjBudget -= allocs[i];
                 }
             }
         }
-    } while (more_allocations);
+    } while (moreAlloc);
 
-    // 將剩餘的資源分配給最佳染色體
-    int total_allocated = accumulate(allocations.begin(), allocations.end(), 0);
-    allocations[best_index] += (remaining_budget - total_allocated);
+    int totalAlloc = accumulate(allocs.begin(), allocs.end(), 0);
+    allocs[bestIdx] += (remBudget - totalAlloc);
 
-    // 計算每個染色體的額外分配資源數量
-    for (int i = 0; i < chromNum; ++i) {
-        allocations[i] -= 80;
-        pop[i].dayNum.push_back(allocations[i]);  // 更新染色體的分配資源數量
-        if (allocations[i])
-            cout << "Chromosome " << i << " allocated " << allocations[i] << " additional resources." << endl;
+    for (int i = 0; i < chromNum; i++) {
+        allocs[i] -= initDayNum;
+        pop[i].currDayNum = allocs[i];
+        // if (allocs[i]) {
+        //     cout << "Chromosome " << i << " allocated " << allocs[i] << " additional resources." << endl;
+        // }
     }
-    cout << endl;
+    // cout << endl;
 }

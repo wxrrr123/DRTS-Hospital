@@ -9,6 +9,11 @@ $ mkdir data
 
 ## Running the Program
 
+### Requirements
+1. C++20
+2. Boost C++ Libraries
+3. Mingw-w64 (optional, only for Windows)
+
 ### Linux/MacOS
 To build and run the program, use the following commands:
 
@@ -24,4 +29,10 @@ $ make run
 
 # Clean up the generated files (binary and output)
 $ make clean
+
+# Ensure rebuilding (clean + build + run)
+$ make all
 ```
+
+### Windows
+Reference the commands in Makefile and manually type it in the shell.

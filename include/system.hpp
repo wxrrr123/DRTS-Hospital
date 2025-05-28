@@ -17,14 +17,13 @@ class System {
     vector<vector<int>> schedule;
 
     /* performances */
-    int avgIdleTime = 0;
-    int avgWaitTime = 0;
+    float avgIdleTime = 0;
+    float avgWaitTime = 0;
     int totalRetTime = 0;
     float performance = 0;
 
     /* initiate */
     System() {};
-    vector<Patient*> readPatientData(string file);
     void addPatient(Patient* p);
     void addVehicle(Vehicle* v);
     void addSubsystem(Subsystem* s);
